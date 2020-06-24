@@ -4,7 +4,7 @@
       <v-navigation-drawer v-model="drawer" app permanent mini-variant>
         <div class="nav-drawer">
           <v-list dense nav>
-            <v-list-item to="/combat">
+            <v-list-item v-if="user" to="/combat">
               <v-icon>mdi-sword-cross</v-icon>
             </v-list-item>
             <v-list-item to="/stats">
@@ -25,6 +25,8 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api'
 import LoginMenu from '@/components/LoginMenu.vue'
+import { useState } from './use/vuex-hooks'
+import { AppState } from './store'
 
 export default defineComponent({
   name: 'App',
@@ -32,7 +34,10 @@ export default defineComponent({
     LoginMenu,
   },
   setup() {
-    return { drawer: true }
+    const { user } = useState<AppState>({
+      user: state => state.user,
+    })
+    return { drawer: true, user }
   },
 })
 </script>

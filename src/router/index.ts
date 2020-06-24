@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -16,6 +17,15 @@ const routes: Array<RouteConfig> = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "combat" */ '../views/Combat.vue'),
+    beforeEnter: (to, from, next) => {
+      const user = store.state.user
+
+      if (user) {
+        next()
+      } else {
+        next(false)
+      }
+    },
   },
   {
     path: '/stats',
