@@ -7,7 +7,7 @@ Vue.use(VueRouter)
 const routes: Array<RouteConfig> = [
   {
     path: '/',
-    redirect: '/combat',
+    redirect: '/stats',
   },
   {
     path: '/combat',
