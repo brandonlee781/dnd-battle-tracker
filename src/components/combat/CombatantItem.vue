@@ -26,6 +26,21 @@
         </template>
         <span>{{ name }} is {{ !downed ? 'not' : null }} Downed</span>
       </v-tooltip>
+
+      <!-- <v-menu v-if="id.length > 1">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn dark icon v-bind="attrs" v-on="on">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item>
+            <v-btn text color="red" @click="removeNpc({ id })">
+              Delete NPC
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-menu> -->
     </v-list-item-content>
   </v-list-item>
 </template>
@@ -75,7 +90,7 @@ export default defineComponent({
 .content {
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: 1fr 75px 64px;
+  grid-template-columns: 1fr 75px 64px 32px;
   gap: 8px;
   grid-template-areas: 'title init downed';
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);

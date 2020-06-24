@@ -1,5 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
+import store from '@/store'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBa1-24_XR4RAauMkTUmJABU_LNNkFVp6Q',
@@ -14,6 +15,12 @@ const firebaseConfig = {
 // Get a Firestore instance
 export const fb = firebase.initializeApp(firebaseConfig)
 export const db = fb.firestore()
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    store.commit('SET_USER', { user: user.email })
+  }
+})
 
 // Export types that exists in Firestore
 // This is not always necessary, but it's used in other examples

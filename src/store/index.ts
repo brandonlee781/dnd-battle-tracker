@@ -108,7 +108,7 @@ export default new Vuex.Store<AppState>({
     },
   },
   mutations: {
-    SET_USER(state, user) {
+    SET_USER(state, { user }) {
       state.user = user
     },
     SET_INITIATIVE(state, { id, initiative }) {
@@ -143,10 +143,10 @@ export default new Vuex.Store<AppState>({
       })
     },
     REMOVE_NPC(state, { id }) {
-      state.npcs.slice(
-        state.npcs.findIndex(n => n.id === id),
-        1
-      )
+      const index = state.npcs.findIndex(n => n.id === id)
+      if (index >= 0) {
+        state.npcs.slice(index, 1)
+      }
     },
     SET_BATTLE_NAME(state, { name }) {
       state.currentBattle.name = name

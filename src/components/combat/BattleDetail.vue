@@ -10,12 +10,12 @@
       </v-subheader>
       <v-list-item
         v-if="showTurns[turnIndex].show"
-        :key="`item-${turn.roumd}-${turn.turn}`"
+        :key="`item-${battle.name}-${turn.round}-${turn.turn}`"
       >
         <v-list-item-content class="pl-5">
           <div
             v-for="(action, index) in turn.action"
-            :key="`${turn.roumd}-${turn.turn}-${index}`"
+            :key="`${battle.name}-${turn.round}-${turn.turn}-${index}`"
             :class="{
               'text-h6': true,
               'green--text text--darken-1': action.healing,
