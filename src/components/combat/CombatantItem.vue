@@ -1,5 +1,5 @@
 <template>
-  <v-list-item :input-value="active" color="green">
+  <v-list-item :input-value="active" color="green" class="px-0">
     <v-list-item-content class="py-1 content">
       <div class="item-title">
         {{ combatant.name }}

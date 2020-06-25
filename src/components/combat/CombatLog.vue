@@ -8,7 +8,7 @@
     </v-card>
 
     <span v-if="error">{{ error }}</span>
-    <v-card v-if="!error && pastBattles">
+    <v-card v-if="!error && pastBattles" class="past-battles">
       <template v-for="battle in pastBattles">
         <v-card-title :key="`${battle.id}-title`" class="battle-title">
           {{ battle.name }}
@@ -69,6 +69,11 @@ export default defineComponent({
   align-items: center;
   max-height: calc(100vh - 48px);
   overflow-y: scroll;
+}
+
+.current-battle-card,
+.past-battles {
+  width: 100%;
 }
 
 .delete-btn {
