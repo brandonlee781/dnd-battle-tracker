@@ -22,6 +22,9 @@
       <v-tab-item>
         <HealingCharts :data="data" :display="displayType" />
       </v-tab-item>
+      <v-tab-item>
+        <SkillsCharts :display="displayType" />
+      </v-tab-item>
     </v-tabs-items>
   </v-card>
 </template>
@@ -34,12 +37,14 @@ import { Battle } from '@/store'
 
 import DamageCharts from '@/components/stats/charts/DamageCharts.vue'
 import HealingCharts from '@/components/stats/charts/HealingCharts.vue'
+import SkillsCharts from '@/components/stats/charts/SkillsCharts.vue'
 
 export default defineComponent({
   name: 'BattleStats',
   components: {
     DamageCharts,
     HealingCharts,
+    SkillsCharts,
   },
   props: {
     battle: {
@@ -52,12 +57,13 @@ export default defineComponent({
     const tabItems = ref([
       { value: 'damage-all', text: 'Damage' },
       { value: 'healing-all', text: 'Healing' },
+      { value: 'rolls', text: 'Rolls' },
     ])
     const displayType: Ref<DisplayType> = ref('total')
     const displayItems = [
-      { text: 'Total Damage', value: 'total' },
-      { text: 'Average Damage', value: 'average' },
-      { text: 'Highest Damage', value: 'high' },
+      { text: 'Total', value: 'total' },
+      { text: 'Average', value: 'average' },
+      { text: 'Highest', value: 'high' },
     ]
     const { collectionData: battles } = useCollection<Battle>('battles', {
       onMounted: true,

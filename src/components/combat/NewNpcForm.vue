@@ -26,6 +26,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from '@vue/composition-api'
+import cuid from 'cuid'
 
 const getNpc = () => ({
   name: '',
@@ -39,7 +40,8 @@ export default defineComponent({
     const newNpc = ref(getNpc())
     const onSubmit = () => {
       if (newNpc.value.name.length) {
-        root.$store.commit('ADD_NPC', newNpc.value)
+        const id = cuid()
+        root.$store.commit('ADD_NPC', { ...newNpc.value, id })
         newNpc.value = getNpc()
       }
     }

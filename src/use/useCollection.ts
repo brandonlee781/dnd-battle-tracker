@@ -24,7 +24,7 @@ export interface QueryOptions {
 
 interface QueryState<R> {
   error: Ref<string | null>
-  collectionData: Ref<R[] | firestore.DocumentData[]>
+  collectionData: Ref<R[]>
   loading: Ref<boolean>
   [name: string]: any
 }
@@ -32,7 +32,7 @@ interface QueryState<R> {
 interface UseCollectionResponse<R> {
   getCollection: Function
   error: Ref<string | null>
-  collectionData: Ref<R[] | firestore.DocumentData[]>
+  collectionData: Ref<R[]>
   loading: Ref<boolean>
 }
 
@@ -64,7 +64,7 @@ export default function<T>(
     collectionData: useFirestore(
       theQuery,
       e => (state.error.value = e.message)
-    ),
+    ) as Ref<T[]>,
     // if the query is loading or ot
     loading: ref(false),
   }
@@ -82,7 +82,7 @@ export default function<T>(
     state.collectionData = useFirestore(
       theQuery,
       e => (state.error.value = e.message)
-    )
+    ) as Ref<T[]>
   }
 
   /**

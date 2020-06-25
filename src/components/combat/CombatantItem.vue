@@ -2,10 +2,11 @@
   <v-list-item :input-value="active" color="green">
     <v-list-item-content class="py-1 content">
       <div class="item-title">
-        {{ name }} {{ count ? ` x${count} ` : null }}
+        {{ combatant.name }}
+        {{ combatant.count ? ` x${combatant.count} ` : null }}
       </div>
       <v-text-field
-        :value="initiative"
+        :value="combatant.initiative"
         type="number"
         hide-details
         label="Initiative"
@@ -19,15 +20,19 @@
             v-on="on"
             class="downed-button"
             icon
-            @click="toggleDownedState({ id })"
+            @click="toggleDownedState({ id: combatant.id })"
           >
-            <v-icon :color="downed ? 'red' : '#37474F'">mdi-skull</v-icon>
+            <v-icon :color="combatant.downed ? 'red' : '#37474F'">
+              mdi-skull
+            </v-icon>
           </v-btn>
         </template>
-        <span>{{ name }} is {{ !downed ? 'not' : null }} Downed</span>
+        <span>
+          {{ combatant.name }} is {{ !combatant.downed ? 'not' : null }} Downed
+        </span>
       </v-tooltip>
 
-      <!-- <v-menu v-if="id.length > 1">
+      <v-menu v-if="combatant.id.length > 1">
         <template v-slot:activator="{ on, attrs }">
           <v-btn dark icon v-bind="attrs" v-on="on">
             <v-icon>mdi-dots-vertical</v-icon>
@@ -35,12 +40,12 @@
         </template>
         <v-list>
           <v-list-item>
-            <v-btn text color="red" @click="removeNpc({ id })">
+            <v-btn text color="red" @click="onDelete">
               Delete NPC
             </v-btn>
           </v-list-item>
         </v-list>
-      </v-menu> -->
+      </v-menu>
     </v-list-item-content>
   </v-list-item>
 </template>
@@ -48,40 +53,41 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api'
 import { useMutations } from '@/use/vuex-hooks'
+import { Character } from '../../store'
 
-export default defineComponent({
+interface CombatantItemProps {
+  combatant: Character
+  active: boolean
+  combatantId: string
+}
+
+export default defineComponent<CombatantItemProps>({
   name: 'CombatantItem',
   props: {
-    id: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    count: {
-      type: Number,
-      default: null,
-    },
-    initiative: {
-      type: Number,
-      default: 0,
-    },
-    downed: {
-      type: Boolean,
-      default: false,
+    combatant: {
+      type: Object,
+      default: () => ({}),
     },
     active: {
       type: Boolean,
       default: false,
     },
+    combatantId: {
+      type: String,
+      default: '',
+    },
   },
-  setup() {
-    const { toggleDownedState } = useMutations({
+  setup(props) {
+    const { toggleDownedState, removeNpc } = useMutations({
       toggleDownedState: 'TOGGLE_DOWNED_STATE',
+      removeNpc: 'REMOVE_NPC',
     })
-    return { toggleDownedState }
+
+    const onDelete = () => {
+      removeNpc({ id: props.combatantId })
+    }
+
+    return { toggleDownedState, removeNpc, onDelete }
   },
 })
 </script>

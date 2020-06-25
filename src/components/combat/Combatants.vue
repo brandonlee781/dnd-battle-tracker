@@ -6,12 +6,9 @@
         <CombatantItem
           v-for="c in combatants"
           :key="c.id"
-          :id="c.id"
-          :name="c.name"
-          :count="c.count"
-          :initiative="c.initiative"
-          :downed="c.downed"
+          :combatant="c"
           :active="active === c.id"
+          :combatantId="c.id"
           @setInitiative="v => setInitiative({ id: c.id, initiative: +v })"
         />
       </v-list>

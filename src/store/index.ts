@@ -38,6 +38,17 @@ export interface Battle {
   createdDate?: Date
 }
 
+export type RollType = 'save' | 'skill'
+export interface RollData {
+  id: string
+  player: string
+  roll: number
+  type: RollType
+  save?: string
+  skill?: string
+  date: Date
+}
+
 export interface AppState {
   party: PC[]
   npcs: NPC[]
@@ -133,19 +144,20 @@ export default new Vuex.Store<AppState>({
         }
       }
     },
-    ADD_NPC(state, { name, count, initiative }) {
-      state.npcs.push({
-        id: cuid(),
+    ADD_NPC(state, { name, count, initiative, id }) {
+      const newNpc = {
+        id,
         name,
         count: +count,
         initiative: +initiative,
         downed: false,
-      })
+      }
+      state.npcs.push(newNpc)
     },
     REMOVE_NPC(state, { id }) {
       const index = state.npcs.findIndex(n => n.id === id)
       if (index >= 0) {
-        state.npcs.slice(index, 1)
+        state.npcs.splice(index, 1)
       }
     },
     SET_BATTLE_NAME(state, { name }) {
@@ -181,7 +193,9 @@ export default new Vuex.Store<AppState>({
         ...state.currentBattle,
         id: cuid(),
       }
-      db.collection('battles').add(battle)
+      db.collection('battles')
+        .doc(battle.id)
+        .set(battle)
       party.forEach(p => {
         commit('SET_PARTY_INITIATIVE', { id: p.id, initiative: 0 })
       })

@@ -7,6 +7,9 @@
             <v-list-item v-if="user" to="/combat">
               <v-icon>mdi-sword-cross</v-icon>
             </v-list-item>
+            <v-list-item v-if="user" to="/rolls">
+              <v-icon>mdi-book-open-page-variant</v-icon>
+            </v-list-item>
             <v-list-item to="/stats">
               <v-icon>mdi-chart-arc</v-icon>
             </v-list-item>

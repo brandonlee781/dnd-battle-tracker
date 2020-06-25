@@ -1,0 +1,198 @@
+<template>
+  <div>
+    <apexchart
+      height="250"
+      type="bar"
+      :options="skillChartData.options"
+      :series="skillChartData.series"
+    />
+    <apexchart
+      height="250"
+      type="bar"
+      :options="saveChartData.options"
+      :series="saveChartData.series"
+    />
+    <v-data-table :headers="headers" :items="rolls" dense>
+      <template v-slot:top>
+        <div class="filter-row">
+          <v-text-field v-model="filterText" label="Filter" class="mx-4" />
+          <v-select
+            v-model="filterPlayer"
+            :items="party"
+            return-object
+            clearable
+            item-text="name"
+            label="Filter By Player"
+          ></v-select>
+          <v-select
+            v-model="filterSkill"
+            :items="skills"
+            label="Filter By Skill"
+            clearable
+            @change="$nextTick(() => (filterSave.value = null))"
+          ></v-select>
+
+          <v-select
+            v-model="filterSave"
+            :items="saves"
+            label="Filter By Save"
+            clearable
+            @change="$nextTick(() => (filterSkill.value = null))"
+          ></v-select>
+        </div>
+      </template>
+      <template #item.player="{ item }">
+        {{ party.find(p => p.id === item.player).name }}
+      </template>
+      <template #item.type="{ item }">{{ item.type | capitalize }}</template>
+      <template #item.name="{ item }">
+        {{ item.skill || item.save }}
+      </template>
+    </v-data-table>
+  </div>
+</template>
+
+<script lang="ts">
+import {
+  defineComponent,
+  computed,
+  ComputedRef,
+  ref,
+  Ref,
+} from '@vue/composition-api'
+import useCollection from '@/use/useCollection'
+import { useState } from '@/use/vuex-hooks'
+import useRollData, { RollCollection } from '@/use/stats/rolls/useRollData'
+import { AppState, RollData, PC } from '@/store'
+import { DisplayType } from '@/use/stats/useBattleData'
+import { DataTableHeader } from 'vuetify'
+
+export default defineComponent<{ display: DisplayType }>({
+  name: 'SkillsCharts',
+  props: {
+    display: {
+      type: String,
+      default: 'total',
+    },
+  },
+  setup(props) {
+    const filterText = ref('')
+    const filterPlayer: Ref<PC | null> = ref(null)
+    const filterSkill = ref(null)
+    const filterSave = ref(null)
+    const display = computed(() => props.display)
+    const { party } = useState<AppState>({
+      party: state => state.party,
+    })
+    const { collectionData } = useCollection<RollData>('rolls')
+    const skillData: ComputedRef<RollCollection[]> = computed(() => {
+      return collectionData.value
+        .filter(c => c.type === 'skill')
+        .map(roll => {
+          const player = party.value.find(p => p.id === roll.player)
+          return {
+            ...roll,
+            player,
+          }
+        })
+    })
+    const saveData: ComputedRef<RollCollection[]> = computed(() => {
+      return collectionData.value
+        .filter(c => c.type === 'save')
+        .map(roll => {
+          const player = party.value.find(p => p.id === roll.player)
+          return {
+            ...roll,
+            player,
+          }
+        })
+    })
+    const { skillChartData, saveChartData, skills, saves } = useRollData({
+      party: party.value,
+      display,
+      skills: skillData,
+      saves: saveData,
+    })
+
+    const headers: DataTableHeader[] = [
+      { text: 'Player', value: 'player.name' },
+      { text: 'Type', value: 'type' },
+      {
+        text: 'Name',
+        value: 'name',
+      },
+      { text: 'Roll', value: 'roll' },
+    ]
+
+    const rolls = computed(() =>
+      [...skillData.value, ...saveData.value]
+        .filter(roll => {
+          if (filterPlayer.value) {
+            if (roll.player.id === filterPlayer.value.id) return true
+            return false
+          }
+          return true
+        })
+        .filter(roll => {
+          if (filterSkill.value) {
+            if (roll.skill === filterSkill.value) return true
+            return false
+          }
+          return true
+        })
+        .filter(roll => {
+          if (filterSave.value) {
+            if (roll.save === filterSave.value) return true
+            return false
+          }
+          return true
+        })
+        .filter(roll => {
+          if (!filterText.value) return true
+          let next = false
+          const filter = filterText.value
+            .toLowerCase()
+            .trim()
+            .split(' ')
+
+          const player = roll.player.name.toLowerCase()
+          let name = ''
+          if (roll.save) {
+            name = roll.save.toLowerCase()
+          } else if (roll.skill) {
+            name = roll.skill.toLowerCase()
+          }
+          filter.forEach(f => {
+            if (player.includes(f) || name.includes(f)) {
+              next = true
+            }
+          })
+          return next
+        })
+    )
+
+    return {
+      party,
+      filterPlayer,
+      filterSkill,
+      filterSave,
+      filterText,
+      skillData,
+      skillChartData,
+      saveChartData,
+      headers,
+      rolls,
+      skills,
+      saves,
+    }
+  },
+})
+</script>
+
+<style lang="scss" scoped>
+.filter-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 150px 150px 150px;
+}
+</style>
