@@ -1,4 +1,4 @@
-import { computed, Ref, ref, watch } from '@vue/composition-api'
+import { Ref, ref, watch } from '@vue/composition-api'
 import { PC, RollData } from '@/store'
 import { ApexOptions } from 'apexcharts'
 import { DisplayType } from '../useBattleData'
@@ -42,6 +42,11 @@ interface UseRollDataParams {
   skills: Ref<RollCollection[]>
   saves: Ref<RollCollection[]>
   display: Ref<DisplayType>
+}
+
+interface RollSeries {
+  name: string
+  data: number[]
 }
 
 function getDisplay(items: RollCollection[], type: DisplayType) {
@@ -96,8 +101,8 @@ export default function({
     },
     theme: { mode: 'dark', palette: 'palette1' },
   }
-  const skillSeries: Ref<any[]> = ref([])
-  const saveSeries: Ref<any[]> = ref([])
+  const skillSeries: Ref<RollSeries[]> = ref([])
+  const saveSeries: Ref<RollSeries[]> = ref([])
 
   watch([skillData, display], () => {
     skillSeries.value = party.map(pc => {
