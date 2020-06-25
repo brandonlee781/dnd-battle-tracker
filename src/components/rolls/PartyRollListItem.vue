@@ -115,6 +115,7 @@ export default defineComponent<PartyRollListItemProps>({
   grid-template-areas:
     'name name button'
     'skills saves roll';
+  width: 100%;
 
   .name {
     grid-area: name;
