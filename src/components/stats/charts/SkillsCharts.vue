@@ -1,16 +1,16 @@
 <template>
   <div>
-    <apexchart
-      height="250"
-      type="bar"
+    <RollChart
+      :selected.sync="filterSkill"
+      :chart-data="skillChartData.chartData"
       :options="skillChartData.options"
-      :series="skillChartData.series"
+      :height="350"
+      :horizontal="!!filterSkill"
     />
-    <apexchart
-      height="250"
-      type="bar"
+    <RollChart
+      :chart-data="saveChartData.chartData"
       :options="saveChartData.options"
-      :series="saveChartData.series"
+      :height="350"
     />
     <v-data-table :headers="headers" :items="rolls" dense>
       <template v-slot:top>
@@ -29,7 +29,7 @@
             :items="skills"
             label="Filter By Skill"
             clearable
-            @change="$nextTick(() => (filterSave.value = null))"
+            @change="$nextTick(() => filterSave && (filterSave.value = null))"
           ></v-select>
 
           <v-select
@@ -37,7 +37,7 @@
             :items="saves"
             label="Filter By Save"
             clearable
-            @change="$nextTick(() => (filterSkill.value = null))"
+            @change="$nextTick(() => filterSkill && (filterSkill.value = null))"
           ></v-select>
         </div>
       </template>
@@ -53,12 +53,14 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
 import {
   defineComponent,
   computed,
   ComputedRef,
   ref,
   Ref,
+  watch,
 } from '@vue/composition-api'
 import useCollection from '@/use/useCollection'
 import { useState } from '@/use/vuex-hooks'
@@ -66,9 +68,14 @@ import useRollData, { RollCollection } from '@/use/stats/rolls/useRollData'
 import { AppState, RollData, PC } from '@/store'
 import { DisplayType } from '@/use/stats/useBattleData'
 import { DataTableHeader } from 'vuetify'
+import VueApexCharts from 'vue-apexcharts'
+import RollChart from './RollChart.vue'
 
 export default defineComponent<{ display: DisplayType }>({
   name: 'SkillsCharts',
+  components: {
+    RollChart,
+  },
   props: {
     display: {
       type: String,
@@ -76,6 +83,7 @@ export default defineComponent<{ display: DisplayType }>({
     },
   },
   setup(props) {
+    const skillChart: Ref<typeof VueApexCharts | null> = ref(null)
     const filterText = ref('')
     const filterPlayer: Ref<PC | null> = ref(null)
     const filterSkill = ref(null)
@@ -85,33 +93,19 @@ export default defineComponent<{ display: DisplayType }>({
       party: state => state.party,
     })
     const { collectionData } = useCollection<RollData>('rolls')
-    const skillData: ComputedRef<RollCollection[]> = computed(() => {
-      return collectionData.value
-        .filter(c => c.type === 'skill')
-        .map(roll => {
-          const player = party.value.find(p => p.id === roll.player)
-          return {
-            ...roll,
-            player,
-          }
-        })
-    })
-    const saveData: ComputedRef<RollCollection[]> = computed(() => {
-      return collectionData.value
-        .filter(c => c.type === 'save')
-        .map(roll => {
-          const player = party.value.find(p => p.id === roll.player)
-          return {
-            ...roll,
-            player,
-          }
-        })
-    })
-    const { skillChartData, saveChartData, skills, saves } = useRollData({
+
+    const {
+      skillChartData,
+      saveChartData,
+      skillData,
+      saveData,
+      skills,
+      saves,
+    } = useRollData({
       party: party.value,
       display,
-      skills: skillData,
-      saves: saveData,
+      rolls: collectionData,
+      selectedSkill: filterSkill,
     })
 
     const headers: DataTableHeader[] = [
@@ -125,7 +119,7 @@ export default defineComponent<{ display: DisplayType }>({
     ]
 
     const rolls = computed(() =>
-      [...skillData.value, ...saveData.value]
+      [...skillData?.value, ...saveData?.value]
         .filter(roll => {
           if (filterPlayer.value) {
             if (roll.player.id === filterPlayer.value.id) return true
@@ -171,19 +165,27 @@ export default defineComponent<{ display: DisplayType }>({
         })
     )
 
+    const onSkillClick = e => {
+      const { tagName, innerHTML } = e.target
+      if (tagName === 'tspan' && skills.includes(innerHTML)) {
+        filterSkill.value = innerHTML
+      }
+    }
+
     return {
       party,
       filterPlayer,
       filterSkill,
       filterSave,
       filterText,
-      skillData,
       skillChartData,
       saveChartData,
       headers,
       rolls,
       skills,
       saves,
+      onSkillClick,
+      skillChart,
     }
   },
 })
@@ -194,5 +196,9 @@ export default defineComponent<{ display: DisplayType }>({
   display: grid;
   gap: 8px;
   grid-template-columns: 1fr 150px 150px 150px;
+}
+
+.skill-chart {
+  max-height: 250px;
 }
 </style>

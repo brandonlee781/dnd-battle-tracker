@@ -2,6 +2,7 @@
   <v-list dense>
     <template v-for="(turn, turnIndex) in battle.turns">
       <v-subheader
+        v-if="turn.action.length"
         :key="`header-${battle.name}-${turn.round}-${turn.turn}`"
         @click="toggleTurn(turnIndex)"
       >
@@ -9,7 +10,7 @@
         {{ turn.turn }}
       </v-subheader>
       <v-list-item
-        v-if="showTurns[turnIndex].show"
+        v-if="showTurns[turnIndex].show && turn.action.length"
         :key="`item-${battle.name}-${turn.round}-${turn.turn}`"
       >
         <v-list-item-content class="pl-5">

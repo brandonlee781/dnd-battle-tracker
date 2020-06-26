@@ -1,7 +1,8 @@
-import { Ref, ref, watch } from '@vue/composition-api'
+import { Ref, computed, ComputedRef } from '@vue/composition-api'
 import { PC, RollData } from '@/store'
-import { ApexOptions } from 'apexcharts'
 import { DisplayType } from '../useBattleData'
+import capitalize from '@/helpers/capitalize'
+import { nonNullable } from '../useBattleTableData'
 
 export const skills = [
   'Acrobatics',
@@ -33,19 +34,29 @@ export const saves = [
   'Charisma',
 ]
 
+export const colors = [
+  '#F44336',
+  '#9C27B0',
+  '#3F51B5',
+  '#00BCD4',
+  '#4CAF50',
+  '#CDDC39',
+  '#FFEB3B',
+]
+
 export interface RollCollection extends Omit<RollData, 'player'> {
   player: PC
 }
 
 interface UseRollDataParams {
   party: PC[]
-  skills: Ref<RollCollection[]>
-  saves: Ref<RollCollection[]>
+  rolls: Ref<RollData[]>
   display: Ref<DisplayType>
+  selectedSkill: Ref<string | null>
 }
 
 interface RollSeries {
-  name: string
+  name?: string
   data: number[]
 }
 
@@ -75,78 +86,190 @@ function getDisplay(items: RollCollection[], type: DisplayType) {
 
 export default function({
   party,
-  skills: skillData,
-  saves: savesData,
+  rolls,
   display,
+  selectedSkill,
 }: UseRollDataParams) {
-  const skillOptions: ApexOptions = {
-    chart: { id: 'skill-bar-chart', toolbar: { tools: { download: false } } },
-    xaxis: {
-      categories: skills,
-    },
-    title: {
-      text: 'Skill Rolls',
-      align: 'center',
-    },
-    theme: { mode: 'dark', palette: 'palette1' },
-  }
-  const saveOptions: ApexOptions = {
-    chart: { id: 'saves-bar-chart', toolbar: { tools: { download: false } } },
-    xaxis: {
-      categories: saves,
-    },
-    title: {
-      text: 'Save Rolls',
-      align: 'center',
-    },
-    theme: { mode: 'dark', palette: 'palette1' },
-  }
-  const skillSeries: Ref<RollSeries[]> = ref([])
-  const saveSeries: Ref<RollSeries[]> = ref([])
-
-  watch([skillData, display], () => {
-    skillSeries.value = party.map(pc => {
-      return {
-        name: pc.name,
-        data: skills.map(skill => {
-          const skillRoll = getDisplay(
-            skillData.value.filter(
-              roll => roll.player.id === pc.id && roll.skill === skill
-            ),
-            display.value
-          )
-          return skillRoll || 0
-        }),
-      }
-    })
+  const skillData: ComputedRef<RollCollection[]> = computed(() => {
+    return rolls.value
+      .filter(c => c.type === 'skill')
+      .map(roll => {
+        const player = party.find(p => p.id === roll.player)
+        if (player) {
+          return {
+            ...roll,
+            player,
+          }
+        }
+      })
+      .filter(nonNullable)
   })
-  watch([savesData, display], () => {
-    saveSeries.value = party.map(pc => {
+  const saveData: ComputedRef<RollCollection[]> = computed(() => {
+    return rolls.value
+      .filter(c => c.type === 'save')
+      .map(roll => {
+        const player = party.find(p => p.id === roll.player)
+        if (player) {
+          return {
+            ...roll,
+            player,
+          }
+        }
+      })
+      .filter(nonNullable)
+  })
+
+  const skillOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+      display: !selectedSkill.value,
+      position: 'bottom',
+      labels: {
+        fontColor: '#ccc',
+      },
+    },
+    title: {
+      display: true,
+      text: `${
+        selectedSkill.value ? selectedSkill.value : 'Skill'
+      } Roll ${capitalize(display.value)}`,
+      fontColor: '#ccc',
+    },
+    scales: {
+      xAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+      yAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+    },
+  }))
+
+  const skillDataSets = computed(() => {
+    if (selectedSkill.value) {
       return {
-        name: pc.name,
-        data: saves.map(save => {
-          const saveRoll = getDisplay(
-            savesData.value.filter(
-              roll => roll.player.id === pc.id && roll.save === save
+        labels: party.map(p => p.name),
+        datasets: [
+          {
+            label: `${capitalize(display.value)} ${selectedSkill.value} Rolls`,
+            backgroundColor: colors.slice(0, party.length),
+            data: party.map(
+              pc =>
+                getDisplay(
+                  skillData.value.filter(
+                    roll =>
+                      roll.player.id === pc.id &&
+                      roll.skill === selectedSkill.value
+                  ),
+                  display.value
+                ) || 0
             ),
-            display.value
+          },
+        ],
+      }
+    } else {
+      return {
+        labels: skills,
+        datasets: party.map((pc, i) => {
+          return {
+            label: `${pc.name}'s Rolls`,
+            backgroundColor: colors[i],
+            data: skills.map(skill => {
+              return (
+                getDisplay(
+                  skillData.value.filter(
+                    roll => roll.player.id === pc.id && roll.skill === skill
+                  ),
+                  display.value
+                ) || 0
+              )
+            }),
+          }
+        }),
+      }
+    }
+  })
+  const saveOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+      position: 'bottom',
+      labels: {
+        fontColor: '#ccc',
+      },
+    },
+    title: {
+      display: true,
+      text: 'Skill Rolls',
+      fontColor: '#ccc',
+    },
+    scales: {
+      xAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+      yAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+    },
+  }
+  const saveDataSets = computed(() => {
+    const labels = saves
+    const datasets = party.map((pc, i) => {
+      return {
+        label: `${pc.name}'s Rolls`,
+        backgroundColor: colors[i],
+        data: saves.map(save => {
+          return (
+            getDisplay(
+              saveData.value.filter(
+                roll => roll.player.id === pc.id && roll.save === save
+              ),
+              display.value
+            ) || 0
           )
-          return saveRoll || 0
         }),
       }
     })
+
+    return {
+      labels,
+      datasets,
+    }
   })
 
   return {
     skills,
     saves,
+    skillData,
+    saveData,
     skillChartData: {
       options: skillOptions,
-      series: skillSeries,
+      chartData: skillDataSets,
     },
     saveChartData: {
       options: saveOptions,
-      series: saveSeries,
+      chartData: saveDataSets,
     },
   }
 }

@@ -1,7 +1,10 @@
 <template>
   <v-card>
     <div class="tab-row">
-      <v-tabs v-model="tab">
+      <v-tabs
+        v-model="tab"
+        @change="tab === 2 ? (displayType = 'average') : null"
+      >
         <v-tab v-for="item in tabItems" :key="item.value">{{
           item.text
         }}</v-tab>
@@ -9,7 +12,7 @@
         <div class="display-select">
           <v-select
             v-model="displayType"
-            :items="displayItems"
+            :items="tab !== 2 ? displayItems : displayItems.slice(1, 3)"
             label="Data Display"
           ></v-select>
         </div>
