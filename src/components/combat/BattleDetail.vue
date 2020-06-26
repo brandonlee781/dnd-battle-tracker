@@ -1,6 +1,6 @@
 <template>
   <v-list dense>
-    <template v-for="(turn, turnIndex) in battle.turns">
+    <template v-for="(turn, turnIndex) in battle.turns.reverse()">
       <v-subheader
         :key="`header-${turn.round}-${turn.turn}`"
         @click="toggleTurn(turnIndex)"

@@ -49,6 +49,13 @@ export interface RollData {
   date: Date
 }
 
+export interface RollCollection extends Omit<RollData, 'date'> {
+  date: {
+    nanoseconds: number
+    seconds: number
+  }
+}
+
 export interface AppState {
   party: PC[]
   npcs: NPC[]

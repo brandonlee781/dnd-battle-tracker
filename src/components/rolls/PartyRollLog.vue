@@ -4,6 +4,7 @@
       <v-list dense>
         <v-list-item v-for="roll in rolls" :key="roll.id">
           <span class="title">
+            {{ roll.date }}:
             {{ roll.player.name }}
             rolled a {{ roll.roll }} on
             {{ roll.skill || roll.save | withArticle }}
@@ -18,9 +19,9 @@
 <script lang="ts">
 import { defineComponent, computed } from '@vue/composition-api'
 import { useState } from '@/use/vuex-hooks'
-import { AppState } from '@/store'
+import { AppState, RollCollection } from '@/store'
 import useCollection from '@/use/useCollection'
-import { RollData } from '@/store'
+import { parse, format } from 'date-fns'
 
 export default defineComponent({
   name: 'PartyRollLog',
@@ -28,13 +29,16 @@ export default defineComponent({
     const { players } = useState<AppState>({
       players: state => state.party,
     })
-    const { collectionData } = useCollection<RollData>('rolls')
+    const { collectionData } = useCollection<RollCollection>('rolls', {
+      orderBy: { field: 'date', direction: 'desc' },
+    })
     const rolls = computed(() => {
       return collectionData.value.map(roll => {
         const player = players.value.find(p => p.id === roll.player)
         return {
           ...roll,
           player,
+          date: format(new Date(roll.date.seconds * 1000), 'MMM dd hh:mm'),
         }
       })
     })
