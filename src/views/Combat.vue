@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="3">
+      <v-col xl="3" lg="4" md="6" sm="12">
         <CombatCard @update:active="val => (activeCharacterId = val)" />
         <Combatants :active="activeCharacterId" />
       </v-col>
-      <v-col cols="9">
+      <v-col xl="9" lg="8" md="6" sm="12">
         <CombatLog />
       </v-col>
     </v-row>

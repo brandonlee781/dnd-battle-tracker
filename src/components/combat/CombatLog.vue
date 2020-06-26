@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
+import { defineComponent, computed } from '@vue/composition-api'
 import { useState, useActions } from '@/use/vuex-hooks'
 import { AppState, Battle } from '@/store'
 import BattleDetail from './BattleDetail.vue'
@@ -52,9 +52,17 @@ export default defineComponent({
         deleteBattle({ id })
       }
     }
+
+    const pastBattles = computed(() => {
+      return collectionData.value.map(d => ({
+        ...d,
+        turns: d.turns.reverse(),
+      }))
+    })
+
     return {
       currentBattle,
-      pastBattles: collectionData,
+      pastBattles,
       onBattleDelete,
       error,
     }
@@ -78,6 +86,11 @@ export default defineComponent({
 
 .delete-btn {
   display: none;
+}
+
+.battle-title {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .battle-title:hover {

@@ -1,8 +1,8 @@
 <template>
   <v-list dense>
-    <template v-for="(turn, turnIndex) in battle.turns.reverse()">
+    <template v-for="(turn, turnIndex) in battle.turns">
       <v-subheader
-        :key="`header-${turn.round}-${turn.turn}`"
+        :key="`header-${battle.name}-${turn.round}-${turn.turn}`"
         @click="toggleTurn(turnIndex)"
       >
         {{ turn.character.name }} - Round: {{ turn.round }} Turn:
@@ -15,7 +15,7 @@
         <v-list-item-content class="pl-5">
           <div
             v-for="(action, index) in turn.action"
-            :key="`${battle.name}-${turn.round}-${turn.turn}-${index}`"
+            :key="`${turn.character.name}-${turn.round}-${turn.turn}-${index}`"
             :class="{
               'text-h6': true,
               'green--text text--darken-1': action.healing,
