@@ -1,11 +1,11 @@
-import { Battle } from '@/store'
-import _ from 'lodash'
+import { Battle, Character } from '@/store'
+import _, { capitalize } from 'lodash'
 import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
-import { ApexOptions } from 'apexcharts'
 
 import useCombatantData from './useCombatantData'
 import useFightData from './useFightData'
 import useRoundData from './useRoundData'
+import { colors } from './rolls/useRollData'
 
 export interface BattleData {
   text: string
@@ -19,12 +19,24 @@ interface UseBattleDataProps {
   battles?: ComputedRef<Battle[]>
   field?: FieldType
   display?: Ref<DisplayType>
+  selectedCombatant?: Ref<Character | null>
+  colors?: string[]
 }
+
+export const getColors = length =>
+  new Array(length).fill(0).map((u, i) => {
+    if (colors[i]) {
+      return colors[i]
+    }
+    return `#${Math.floor(Math.random() * 16777215).toString(16)}`
+  })
 
 export default function({
   battles = ref([]),
   field = 'damage',
   display = ref('total'),
+  selectedCombatant = ref(null),
+  colors = [],
 }: UseBattleDataProps = {}) {
   // get all combatants
   const combatants = computed(() => {
@@ -34,44 +46,66 @@ export default function({
     return _.uniqBy(combs, i => i.id)
   })
 
+  const backgroundColors = computed(() =>
+    colors.length ? colors : getColors(combatants.value.length)
+  )
+
   const combatantData = useFightData({
     battles,
     combatants,
     field,
   })
 
-  const {
-    againstData: pointsAgainstData,
-    fromData: pointsFromData,
-  } = useCombatantData({
+  const { againstData, fromData } = useCombatantData({
     combatants,
     battles,
     field,
+    colors: backgroundColors,
+    selectedCombatant,
   })
 
   const barChartData = computed(() => {
-    const label = `${display.value.charAt(0).toUpperCase() +
-      display.value.slice(1)} ${field.charAt(0).toUpperCase() + field.slice(1)}`
-    const options: ApexOptions = {
-      chart: { id: 'damage-bar', toolbar: { tools: { download: false } } },
-      xaxis: {
-        categories: combatantData[display.value].value.map(t => t.text),
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      legend: {
+        display: false,
       },
       title: {
-        text: `${field.charAt(0).toUpperCase() + field.slice(1)} Per Combatant`,
-        align: 'center',
+        display: true,
+        text: `${capitalize(display.value)} ${capitalize(field)} per Combatant`,
+        fontColor: '#ccc',
       },
-      theme: { mode: 'dark', palette: 'palette1' },
+      scales: {
+        xAxes: [
+          {
+            gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+            ticks: {
+              fontColor: '#ccc',
+            },
+          },
+        ],
+        yAxes: [
+          {
+            gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+            ticks: {
+              fontColor: '#ccc',
+            },
+          },
+        ],
+      },
     }
-    const series = [
-      {
-        name: label,
-        data: combatantData[display.value].value.map(t => t.value),
-      },
-    ]
     return {
       options,
-      series,
+      chartData: {
+        labels: combatants.value.map(c => c.name),
+        datasets: [
+          {
+            backgroundColor: backgroundColors.value,
+            data: combatantData[display.value].value.map(t => t.value),
+          },
+        ],
+      },
     }
   })
   const roundData: any = ref({
@@ -85,6 +119,7 @@ export default function({
         roundData.value = useRoundData({
           battles,
           field,
+          colors: backgroundColors.value,
         })
       }
     },
@@ -94,8 +129,9 @@ export default function({
   return {
     combatants,
     barChartData,
-    pointsAgainstData,
-    pointsFromData,
+    againstData,
+    fromData,
     roundData,
+    colors: backgroundColors.value,
   }
 }

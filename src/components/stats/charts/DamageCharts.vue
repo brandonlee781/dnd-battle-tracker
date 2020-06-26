@@ -1,16 +1,25 @@
 <template>
   <div>
-    <apexchart height="250" type="bar" v-bind="barChartData" />
-
-    <apexchart
-      v-if="data.length === 1"
-      height="250"
-      type="bar"
-      :options="roundData.options"
-      :series="roundData.series"
+    <BarChart
+      :options="barChartData.options"
+      :chartData="barChartData.chartData"
+      :height="350"
     />
+
+    <BarChart
+      v-if="data.length === 1"
+      :options="roundData.options"
+      :chartData="roundData.chartData"
+      :height="350"
+    />
+
     <v-divider />
-    <RadarCharts :battles="data" :combatants="combatants" field="damage" />
+    <RadarCharts
+      :battles="data"
+      :combatants="combatants"
+      field="damage"
+      :colors="colors"
+    />
     <ActionTable
       v-bind="tableData"
       :page-length="data.length ? combatants.length : 5"
@@ -25,10 +34,12 @@ import { Battle } from '@/store'
 import RadarCharts from '@/components/stats/charts/RadarCharts.vue'
 import ActionTable from '@/components/stats/ActionTable.vue'
 import useBattleTableData from '@/use/stats/useBattleTableData'
+import BarChart from '@/components/stats/charts/BarChart.vue'
 
 export default defineComponent<{ data: Battle[]; display: DisplayType }>({
   name: 'DamageCharts',
   components: {
+    BarChart,
     RadarCharts,
     ActionTable,
   },
@@ -45,7 +56,7 @@ export default defineComponent<{ data: Battle[]; display: DisplayType }>({
   setup(props) {
     const battles = computed(() => props.data)
     const display = computed(() => props.display)
-    const { combatants, barChartData, roundData } = useBattleData({
+    const { combatants, barChartData, roundData, colors } = useBattleData({
       battles,
       field: 'damage',
       display,
@@ -58,6 +69,7 @@ export default defineComponent<{ data: Battle[]; display: DisplayType }>({
       barChartData,
       roundData,
       tableData,
+      colors,
     }
   },
 })

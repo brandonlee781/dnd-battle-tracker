@@ -1,11 +1,16 @@
 <template>
   <div>
-    <apexchart height="250" type="bar" v-bind="barChartData" />
-    <apexchart
+    <BarChart
+      :options="barChartData.options"
+      :chartData="barChartData.chartData"
+      :height="350"
+    />
+
+    <BarChart
       v-if="data.length === 1"
-      height="250"
-      type="bar"
-      v-bind="roundData"
+      :options="roundData.options"
+      :chartData="roundData.chartData"
+      :height="350"
     />
     <v-divider />
     <v-divider></v-divider>
@@ -21,10 +26,12 @@ import useBattleTableData from '@/use/stats/useBattleTableData'
 import RadarCharts from '@/components/stats/charts/RadarCharts.vue'
 import ActionTable from '@/components/stats/ActionTable.vue'
 import { Battle } from '@/store'
+import BarChart from '@/components/stats/charts/BarChart.vue'
 
 export default defineComponent<{ data: Battle[]; display: DisplayType }>({
   name: 'HealingCharts',
   components: {
+    BarChart,
     RadarCharts,
     ActionTable,
   },

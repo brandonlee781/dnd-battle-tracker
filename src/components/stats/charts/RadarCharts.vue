@@ -11,8 +11,14 @@
       </v-list-item>
     </v-list>
     <template v-if="selectedCombatant">
-      <apexchart height="100%" width="100%" type="radar" v-bind="againstData" />
-      <apexchart height="100%" width="100%" type="radar" v-bind="fromData" />
+      <RadarChart
+        :options="fromData.options"
+        :chart-data="fromData.chartData"
+      />
+      <RadarChart
+        :options="againstData.options"
+        :chart-data="againstData.chartData"
+      />
     </template>
   </div>
 </template>
@@ -21,15 +27,20 @@
 import { defineComponent, Ref, ref, computed } from '@vue/composition-api'
 import { Character, Battle } from '@/store'
 import useBattleData, { FieldType } from '@/use/stats/useBattleData'
+import RadarChart from '@/components/stats/charts/RadarChart.vue'
 
 interface RadarChartsProps {
   combatants: Character[]
   field: FieldType
   battles: Battle[]
+  colors: string[]
 }
 
 export default defineComponent<RadarChartsProps>({
   name: 'RadarCharts',
+  components: {
+    RadarChart,
+  },
   props: {
     combatants: {
       type: Array,
@@ -43,46 +54,19 @@ export default defineComponent<RadarChartsProps>({
       type: Array,
       default: () => [],
     },
+    colors: {
+      type: Array,
+      default: () => [],
+    },
   },
   setup(props) {
     const selectedCombatant: Ref<Character | null> = ref(null)
     const battles = computed(() => props.battles)
-    const { pointsAgainstData, pointsFromData } = useBattleData({
+    const { againstData, fromData } = useBattleData({
       battles,
       field: props.field,
-    })
-    const fieldLabel =
-      props.field.charAt(0).toUpperCase() + props.field.slice(1)
-
-    const againstData = computed(() => {
-      const options = pointsAgainstData.options.value
-      return {
-        options: {
-          ...options,
-          title: {
-            text: `${fieldLabel} Against Targets`,
-            align: 'center',
-          },
-        },
-        series: pointsAgainstData.series.value.filter(
-          s => s.id == selectedCombatant.value?.id
-        ),
-      }
-    })
-    const fromData = computed(() => {
-      const options = pointsFromData.options.value
-      return {
-        options: {
-          ...options,
-          title: {
-            text: `${fieldLabel} From Targets`,
-            align: 'center',
-          },
-        },
-        series: pointsFromData.series.value.filter(
-          s => s.id == selectedCombatant.value?.id
-        ),
-      }
+      selectedCombatant: selectedCombatant,
+      colors: props.colors,
     })
 
     const selectCombatant = combatant => {

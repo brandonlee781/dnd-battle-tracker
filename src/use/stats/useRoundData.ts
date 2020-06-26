@@ -1,14 +1,15 @@
 import { FieldType } from './useBattleData'
 import { Battle } from '@/store'
-import { ComputedRef, computed, Ref, toRefs } from '@vue/composition-api'
-import { ApexOptions } from 'apexcharts'
+import { ComputedRef, computed, Ref } from '@vue/composition-api'
+import { capitalize } from 'lodash'
 
 interface UseRoundDataProps {
   battles: Ref<Battle[]> | ComputedRef<Battle[]>
   field: FieldType
+  colors: string[]
 }
 
-export default function({ battles, field }: UseRoundDataProps) {
+export default function({ battles, field, colors }: UseRoundDataProps) {
   const battle = computed(() => battles.value[0])
   const maxRounds = computed(() => {
     let count = 0
@@ -23,9 +24,10 @@ export default function({ battles, field }: UseRoundDataProps) {
   const data = computed(() => {
     const combatants = battle.value.combatants
     const roundValues = {}
-    combatants?.forEach(combatant => {
+    combatants?.forEach((combatant, i) => {
       roundValues[combatant.id] = {
-        name: `${combatant.name} ${field}`,
+        label: `${combatant.name} ${field}`,
+        backgroundColor: colors[i],
         data: [],
       }
       for (let i = 1; i <= maxRounds.value; i++) {
@@ -40,26 +42,52 @@ export default function({ battles, field }: UseRoundDataProps) {
     return roundValues
   })
 
-  const options: ComputedRef<ApexOptions> = computed(() => ({
-    chart: { id: 'damage-bar', toolbar: { tools: { download: false } } },
-    xaxis: {
-      categories: [...new Array(maxRounds.value).fill(0)].map((v, i) => {
-        return `Round ${i + 1}`
-      }),
+  const options: ComputedRef<any> = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+      display: true,
+      position: 'bottom',
+      labels: {
+        fontColor: '#ccc',
+      },
     },
     title: {
-      text: `${field.charAt(0).toUpperCase() + field.slice(1)} Per Rounds`,
-      align: 'center',
+      display: true,
+      text: `${capitalize(field)} per Round`,
+      fontColor: '#ccc',
     },
-    theme: { mode: 'dark', palette: 'palette1' },
+    scales: {
+      xAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+      yAxes: [
+        {
+          gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
+          ticks: {
+            fontColor: '#ccc',
+          },
+        },
+      ],
+    },
   }))
 
-  const series = computed(() => {
-    return Object.keys(data.value).map(k => data.value[k])
+  const chartData = computed(() => {
+    return {
+      labels: [...new Array(maxRounds.value).fill(0)].map((v, i) => {
+        return `Round ${i + 1}`
+      }),
+      datasets: Object.keys(data.value).map(k => data.value[k]),
+    }
   })
 
   return {
     options,
-    series,
+    chartData,
   }
 }

@@ -34,15 +34,7 @@ export const saves = [
   'Charisma',
 ]
 
-export const colors = [
-  '#F44336',
-  '#9C27B0',
-  '#3F51B5',
-  '#00BCD4',
-  '#4CAF50',
-  '#CDDC39',
-  '#FFEB3B',
-]
+export const colors = ['#F44336', '#9C27B0', '#3F51B5', '#00BCD4', '#4CAF50']
 
 export interface RollCollection extends Omit<RollData, 'player'> {
   player: PC

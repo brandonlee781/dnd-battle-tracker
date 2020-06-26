@@ -53,22 +53,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import {
-  defineComponent,
-  computed,
-  ComputedRef,
-  ref,
-  Ref,
-  watch,
-} from '@vue/composition-api'
+import { defineComponent, computed, ref, Ref } from '@vue/composition-api'
 import useCollection from '@/use/useCollection'
 import { useState } from '@/use/vuex-hooks'
-import useRollData, { RollCollection } from '@/use/stats/rolls/useRollData'
+import useRollData from '@/use/stats/rolls/useRollData'
 import { AppState, RollData, PC } from '@/store'
 import { DisplayType } from '@/use/stats/useBattleData'
 import { DataTableHeader } from 'vuetify'
-import VueApexCharts from 'vue-apexcharts'
 import RollChart from './RollChart.vue'
 
 export default defineComponent<{ display: DisplayType }>({
@@ -83,7 +74,6 @@ export default defineComponent<{ display: DisplayType }>({
     },
   },
   setup(props) {
-    const skillChart: Ref<typeof VueApexCharts | null> = ref(null)
     const filterText = ref('')
     const filterPlayer: Ref<PC | null> = ref(null)
     const filterSkill = ref(null)
@@ -185,7 +175,6 @@ export default defineComponent<{ display: DisplayType }>({
       skills,
       saves,
       onSkillClick,
-      skillChart,
     }
   },
 })
