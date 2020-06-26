@@ -10,11 +10,38 @@
         }}</v-tab>
         <v-spacer />
         <div class="display-select">
-          <v-select
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                outlined
+                color="primary"
+                dark
+                v-bind="attrs"
+                v-on="on"
+                class="ma-2"
+              >
+                <span class="full-select">
+                  {{ displayItems.find(i => i.value === displayType).text }}
+                  <v-icon>mdi-menu-down</v-icon>
+                </span>
+                <v-icon class="filter-icon">mdi-filter-variant</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                v-for="(item, index) in displayItems"
+                :key="index"
+                @click="displayType = item.value"
+              >
+                <v-list-item-title>{{ item.text }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <!-- <v-select
             v-model="displayType"
             :items="tab !== 2 ? displayItems : displayItems.slice(1, 3)"
             label="Data Display"
-          ></v-select>
+          ></v-select> -->
         </div>
       </v-tabs>
     </div>
@@ -90,5 +117,17 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   padding-right: 4px;
+}
+.full-select {
+  display: none;
+}
+
+@media (min-width: 800px) {
+  .full-select {
+    display: block;
+  }
+  .filter-icon {
+    display: none;
+  }
 }
 </style>

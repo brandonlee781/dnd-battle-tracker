@@ -1,15 +1,27 @@
 <template>
   <div class="radar-charts">
-    <v-list dense class="combatant-list">
-      <v-list-item
-        v-for="c in combatants"
-        :key="c.id"
-        :input-value="selectedCombatant && c.id === selectedCombatant.id"
-        @click="selectCombatant(c)"
-      >
-        {{ c.name }}
-      </v-list-item>
-    </v-list>
+    <div>
+      <v-list dense class="combatant-list">
+        <v-list-item
+          v-for="c in combatants"
+          :key="c.id"
+          :input-value="selectedCombatant && c.id === selectedCombatant.id"
+          @click="selectCombatant(c)"
+        >
+          {{ c.name }}
+        </v-list-item>
+      </v-list>
+      <v-select
+        v-model="selectedCombatant"
+        :items="combatants"
+        item-text="name"
+        item-value="id"
+        return-object
+        class="combatant-select"
+        label="Select Combatant"
+      ></v-select>
+    </div>
+
     <template v-if="selectedCombatant">
       <RadarChart
         :options="fromData.options"
@@ -81,13 +93,29 @@ export default defineComponent<RadarChartsProps>({
 .radar-charts {
   width: 100%;
   display: grid;
-  grid-template-rows: 275px;
-  grid-template-columns: 20% 40% 40%;
+  grid-template-rows: 64px 1fr 1fr;
+  grid-template-columns: 100%;
   padding: 8px;
+  @media (min-width: 800px) {
+    grid-template-rows: 275px;
+    grid-template-columns: 20% 40% 40%;
+  }
 
   .combatant-list {
+    display: none;
+    @media (min-width: 800px) {
+      display: block;
+      max-height: 275px;
+      overflow-y: scroll;
+    }
+  }
+
+  .combatant-select {
+    display: block;
     max-height: 275px;
-    overflow-y: scroll;
+    @media (min-width: 800px) {
+      display: none;
+    }
   }
 }
 </style>

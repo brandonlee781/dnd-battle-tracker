@@ -1,7 +1,14 @@
 <template>
   <v-app>
-    <v-main>
-      <v-navigation-drawer v-model="drawer" app permanent mini-variant>
+    <v-main v-resize="onResize">
+      <v-navigation-drawer
+        v-if="!isMobile"
+        v-model="drawer"
+        app
+        permanent
+        mini-variant
+        class="nav-drawer"
+      >
         <div class="nav-drawer">
           <v-list dense nav>
             <v-list-item v-if="user" to="/combat">
@@ -18,6 +25,19 @@
           <LoginMenu />
         </div>
       </v-navigation-drawer>
+      <v-app-bar v-if="isMobile" class="app-bar">
+        <v-btn text shaped v-if="user" to="/combat">
+          <v-icon>mdi-sword-cross</v-icon>
+        </v-btn>
+        <v-btn text shaped v-if="user" to="/rolls">
+          <v-icon>mdi-book-open-page-variant</v-icon>
+        </v-btn>
+        <v-btn text shaped to="/stats">
+          <v-icon>mdi-chart-arc</v-icon>
+        </v-btn>
+        <v-spacer />
+        <LoginMenu />
+      </v-app-bar>
       <transition name="page" mode="out-in">
         <router-view></router-view>
       </transition>
@@ -26,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
+import { defineComponent, ref, onMounted } from '@vue/composition-api'
 import LoginMenu from '@/components/LoginMenu.vue'
 import { useState } from './use/vuex-hooks'
 import { AppState } from './store'
@@ -37,10 +57,20 @@ export default defineComponent({
     LoginMenu,
   },
   setup() {
+    const isMobile = ref(false)
     const { user } = useState<AppState>({
       user: state => state.user,
     })
-    return { drawer: true, user }
+    const onResize = () => {
+      const width = window.innerWidth
+      if (width > 800) {
+        isMobile.value = false
+      } else {
+        isMobile.value = true
+      }
+    }
+    onMounted(() => onResize())
+    return { drawer: true, user, onResize, isMobile }
   },
 })
 </script>
@@ -52,6 +82,10 @@ export default defineComponent({
   align-items: center;
   height: 100%;
   padding-bottom: 8px;
+}
+
+.app-bar-list {
+  display: flex !important;
 }
 .page-enter-active,
 .page-leave-active {

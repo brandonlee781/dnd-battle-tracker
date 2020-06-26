@@ -1,10 +1,10 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col xl="3" lg="4" md="6" sm="12">
+      <v-col xl="3" lg="4" md="6" cols="12">
         <BattleList v-model="selection" />
       </v-col>
-      <v-col xl="9" lg="8" md="6" sm="12">
+      <v-col xl="9" lg="8" md="6" cols="12">
         <BattleStats :battle="selection" />
       </v-col>
     </v-row>

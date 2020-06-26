@@ -1,10 +1,10 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col xl="3" lg="4" md="6" sm="12">
+      <v-col xl="3" lg="4" md="6" cols="12">
         <PartyRollCard />
       </v-col>
-      <v-col xl="9" lg="8" md="6" sm="12">
+      <v-col xl="9" lg="8" md="6" cols="12">
         <PartyRollLog />
       </v-col>
     </v-row>
