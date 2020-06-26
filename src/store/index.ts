@@ -179,6 +179,9 @@ export default new Vuex.Store<AppState>({
     ADD_BATTLE_TURN(state, { turn }) {
       state.currentBattle.turns.push(turn)
     },
+    MODIFY_BATTLE_TURN(state, { turn, index }) {
+      state.currentBattle.turns[index] = turn
+    },
     RESET_CURRENT_BATTLE(state) {
       state.currentBattle = {
         name: '',
@@ -236,7 +239,15 @@ export default new Vuex.Store<AppState>({
         character,
       }
 
-      commit('ADD_BATTLE_TURN', { turn: battleTurn })
+      const turnIndex = state.currentBattle.turns.findIndex(
+        turn => turn.round === battleTurn.round && turn.turn === battleTurn.turn
+      )
+
+      if (turnIndex >= 0) {
+        commit('MODIFY_BATTLE_TURN', { turn: battleTurn, index: turnIndex })
+      } else {
+        commit('ADD_BATTLE_TURN', { turn: battleTurn })
+      }
     },
     async deleteBattle(ctx, { id }) {
       db.collection('battles')
