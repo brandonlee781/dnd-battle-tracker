@@ -17,7 +17,7 @@ export interface NPC extends PC {
 export type Character = NPC | PC
 
 export interface BattleAction {
-  target: Character
+  target?: Character
   damage: number
   healing: number
   message: string
@@ -237,6 +237,16 @@ export default new Vuex.Store<AppState>({
           return a
         }),
         character,
+      }
+
+      if (battleTurn.action.length === 0) {
+        battleTurn.action.push({
+          target: undefined,
+          damage: 0,
+          healing: 0,
+          downed: false,
+          message: `${character.name} did nothing worth noting.`,
+        })
       }
 
       const turnIndex = state.currentBattle.turns.findIndex(
