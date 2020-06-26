@@ -73,7 +73,7 @@ export default function({
       },
       title: {
         display: true,
-        text: `${capitalize(display.value)} ${capitalize(field)} per Combatant`,
+        text: `${capitalize(field)} per Combatant`,
         fontColor: '#ccc',
       },
       scales: {
