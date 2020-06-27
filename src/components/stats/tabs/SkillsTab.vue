@@ -60,7 +60,7 @@ import useRollData from '@/use/stats/rolls/useRollData'
 import { AppState, RollData, PC } from '@/store'
 import { DisplayType } from '@/use/stats/useBattleData'
 import { DataTableHeader } from 'vuetify'
-import RollChart from './RollChart.vue'
+import RollChart from '@/components/stats/charts/RollChart.vue'
 
 export default defineComponent<{ display: DisplayType }>({
   name: 'SkillsCharts',

@@ -14,12 +14,7 @@
     />
 
     <v-divider />
-    <RadarCharts
-      :battles="data"
-      :combatants="combatants"
-      field="damage"
-      :colors="colors"
-    />
+    <RadarCharts :battles="data" :combatants="combatants" field="damage" />
     <ActionTable
       v-bind="tableData"
       :page-length="data.length ? combatants.length : 5"
@@ -56,7 +51,7 @@ export default defineComponent<{ data: Battle[]; display: DisplayType }>({
   setup(props) {
     const battles = computed(() => props.data)
     const display = computed(() => props.display)
-    const { combatants, barChartData, roundData, colors } = useBattleData({
+    const { combatants, barChartData, roundData } = useBattleData({
       battles,
       field: 'damage',
       display,
@@ -69,7 +64,6 @@ export default defineComponent<{ data: Battle[]; display: DisplayType }>({
       barChartData,
       roundData,
       tableData,
-      colors,
     }
   },
 })
