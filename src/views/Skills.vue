@@ -22,9 +22,6 @@ export default defineComponent({
     PartyRollCard,
     PartyRollLog,
   },
-  setup(props, ctx) {
-    return {}
-  },
 })
 </script>
 

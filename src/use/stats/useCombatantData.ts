@@ -1,7 +1,6 @@
 import { Ref, ComputedRef, computed } from '@vue/composition-api'
 import { Battle, Character } from '@/store'
 import { FieldType, getNewColor } from './useBattleData'
-import { getCombatantsTurns } from './useFightData'
 import capitalize from '@/helpers/capitalize'
 import { nonNullable } from './useBattleTableData'
 
@@ -14,19 +13,6 @@ interface UseCombatantsDataProps {
 
 interface TargetData {
   [name: string]: number
-}
-
-const getTargetObject = (
-  combatants: Character[],
-  selected: string
-): TargetData => {
-  const targets = {}
-  combatants.forEach(c => {
-    if (c.id !== selected) {
-      targets[c.id] = 0
-    }
-  })
-  return targets
 }
 
 function getSelectedColor(name) {

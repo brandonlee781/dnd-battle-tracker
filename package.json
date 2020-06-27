@@ -10,6 +10,7 @@
     "deploy": "firebase deploy"
   },
   "dependencies": {
+    "@types/chart.js": "^2.9.22",
     "@vue/composition-api": "^0.6.4",
     "@vueuse/firebase": "^2.0.34",
     "chart.js": "^2.9.3",

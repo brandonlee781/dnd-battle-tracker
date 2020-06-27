@@ -4,7 +4,7 @@ import { FieldType, BattleData } from './useBattleData'
 
 function getAverage(nums: number[]) {
   if (!nums.length) return 0
-  const len = nums.length
+  const len = nums.filter(n => n).length
   const total = nums.reduce((a, b) => a + b, 0)
 
   return total / len

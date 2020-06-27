@@ -2,6 +2,7 @@ import { FieldType, getNewColor } from './useBattleData'
 import { Battle } from '@/store'
 import { ComputedRef, computed, Ref } from '@vue/composition-api'
 import { capitalize } from 'lodash'
+import { ChartOptions, ChartData } from 'chart.js'
 
 interface UseRoundDataProps {
   battles: Ref<Battle[]> | ComputedRef<Battle[]>
@@ -23,7 +24,7 @@ export default function({ battles, field }: UseRoundDataProps) {
   const data = computed(() => {
     const combatants = battle.value.combatants
     const roundValues = {}
-    combatants?.forEach((combatant, i) => {
+    combatants?.forEach(combatant => {
       roundValues[combatant.id] = {
         label: `${combatant.name} ${field}`,
         backgroundColor: getNewColor(combatant.name),
@@ -41,7 +42,7 @@ export default function({ battles, field }: UseRoundDataProps) {
     return roundValues
   })
 
-  const options: ComputedRef<any> = computed(() => ({
+  const options: ComputedRef<ChartOptions> = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
     legend: {
@@ -76,7 +77,7 @@ export default function({ battles, field }: UseRoundDataProps) {
     },
   }))
 
-  const chartData = computed(() => {
+  const chartData: ComputedRef<ChartData> = computed(() => {
     return {
       labels: [...new Array(maxRounds.value).fill(0)].map((v, i) => {
         return `Round ${i + 1}`

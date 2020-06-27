@@ -7,6 +7,7 @@ import useFightData from './useFightData'
 import useRoundData from './useRoundData'
 import { colors } from './rolls/useRollData'
 import store from '@/store'
+import { ChartOptions, ChartData } from 'chart.js'
 
 export interface BattleData {
   text: string
@@ -21,6 +22,11 @@ interface UseBattleDataProps {
   field?: FieldType
   display?: Ref<DisplayType>
   selectedCombatant?: Ref<Character | null>
+}
+
+interface RoundData {
+  options: ComputedRef<ChartOptions> | {}
+  chartData: ComputedRef<ChartData> | {}
 }
 
 function intToRGB(j) {
@@ -124,9 +130,9 @@ export default function({
       },
     }
   })
-  const roundData: any = ref({
+  const roundData: Ref<RoundData> = ref({
     options: {},
-    series: [],
+    chartData: {},
   })
   watch(
     battles,

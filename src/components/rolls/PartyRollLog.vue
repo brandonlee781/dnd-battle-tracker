@@ -21,7 +21,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 import { useState } from '@/use/vuex-hooks'
 import { AppState, RollCollection } from '@/store'
 import useCollection from '@/use/useCollection'
-import { parse, format } from 'date-fns'
+import { format } from 'date-fns'
 
 export default defineComponent({
   name: 'PartyRollLog',
