@@ -1,8 +1,8 @@
 import { FieldType, getNewColor } from './useBattleData'
 import { Battle } from '@/store'
 import { ComputedRef, computed, Ref } from '@vue/composition-api'
-import { capitalize } from 'lodash'
 import { ChartOptions, ChartData } from 'chart.js'
+import capitalize from '@/helpers/capitalize'
 
 interface UseRoundDataProps {
   battles: Ref<Battle[]> | ComputedRef<Battle[]>

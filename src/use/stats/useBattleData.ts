@@ -1,5 +1,5 @@
 import { Battle, Character } from '@/store'
-import _, { capitalize } from 'lodash'
+import uniqBy from 'lodash/uniqBy'
 import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
 
 import useCombatantData from './useCombatantData'
@@ -8,6 +8,7 @@ import useRoundData from './useRoundData'
 import { colors } from './rolls/useRollData'
 import store from '@/store'
 import { ChartOptions, ChartData } from 'chart.js'
+import capitalize from '@/helpers/capitalize'
 
 export interface BattleData {
   text: string
@@ -64,7 +65,7 @@ export default function({
     const combs = battles.value
       .map(b => b.combatants)
       .reduce((a, b) => a.concat(b), [])
-    return _.uniqBy(combs, i => i.id)
+    return uniqBy(combs, i => i.id)
   })
 
   const backgroundColors = computed(() =>

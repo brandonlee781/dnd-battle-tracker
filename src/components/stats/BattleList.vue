@@ -16,7 +16,8 @@
           @click="$emit('input', battle.id)"
         >
           <v-list-item-title>
-            {{ battle.name }} - {{ getDate(battle.createdDate) }}
+            {{ battle.name }} -
+            {{ (battle.createdDate * 1000) | date('MMM dd') }}
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -28,7 +29,6 @@
 import { defineComponent } from '@vue/composition-api'
 import useCollection from '@/use/useCollection'
 import { Battle } from '@/store'
-import { format } from 'date-fns'
 
 export default defineComponent({
   name: 'BattleList',
@@ -43,9 +43,7 @@ export default defineComponent({
       onMounted: true,
       orderBy: { field: 'createdDate', direction: 'desc' },
     })
-    const getDate = date =>
-      date && date.seconds && format(new Date(date.seconds * 1000), 'MMM dd')
-    return { error, battles: collectionData, getDate }
+    return { error, battles: collectionData }
   },
 })
 </script>
