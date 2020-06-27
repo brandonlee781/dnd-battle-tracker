@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import capitalize from '@/helpers/capitalize'
+import format from 'date-fns/format'
 
 function getArticle(phrase) {
   let word
@@ -59,5 +60,10 @@ function getArticle(phrase) {
   return 'a ' + phrase
 }
 
+function getDate(value, formatString = 'yyyy-MM-dd') {
+  return format(new Date(value), formatString)
+}
+
 Vue.filter('withArticle', getArticle)
 Vue.filter('capitalize', capitalize)
+Vue.filter('date', getDate)

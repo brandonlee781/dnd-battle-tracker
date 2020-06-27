@@ -45,6 +45,9 @@
           ></v-select>
         </div>
       </template>
+      <template #item.date="{ item }">
+        {{ (item.date.seconds * 1000) | date('MMM dd') }}
+      </template>
       <template #item.player="{ item }">
         {{ party.find(p => p.id === item.player).name }}
       </template>
@@ -105,6 +108,7 @@ export default defineComponent<{ display: DisplayType }>({
     })
 
     const headers: DataTableHeader[] = [
+      { text: 'Date', value: 'date' },
       { text: 'Player', value: 'player.name' },
       { text: 'Type', value: 'type' },
       {
