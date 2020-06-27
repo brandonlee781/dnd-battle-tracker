@@ -1,8 +1,12 @@
 import { computed } from '@vue/composition-api'
-import { DataTableHeader } from 'vuetify'
 
 import { ActionTableItem } from '@/components/stats/ActionTable.vue'
 import capitalize from '@/helpers/capitalize'
+
+export interface DataTableHeader {
+  text: string
+  value: string
+}
 
 export function nonNullable<T>(value: T): value is NonNullable<T> {
   return value !== null && value !== undefined

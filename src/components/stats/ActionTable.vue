@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api'
-import { DataTableHeader } from 'vuetify'
+import { DataTableHeader } from '@/use/stats/useBattleTableData'
 
 export interface ActionTableItem {
   battle: string

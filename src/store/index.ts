@@ -13,7 +13,7 @@ export interface PC {
   downed: boolean
   count?: null
 }
-export interface NPC extends PC {
+export interface NPC extends Omit<PC, 'count'> {
   count?: number
 }
 export type Character = NPC | PC

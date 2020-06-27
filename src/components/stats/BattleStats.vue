@@ -117,15 +117,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  max-height: calc(100vh - 48px);
-  overflow-y: scroll;
-}
-.card {
-  width: 100%;
+@media (min-width: 800px) {
+  .wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    max-height: calc(100vh - 48px);
+    overflow-y: scroll;
+  }
+  .card {
+    width: 100%;
+  }
 }
 .tab-row {
   display: flex;

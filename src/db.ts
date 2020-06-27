@@ -1,4 +1,5 @@
 import firebase from 'firebase/app'
+import 'firebase/auth'
 import 'firebase/firestore'
 import store from '@/store'
 
@@ -25,4 +26,4 @@ firebase.auth().onAuthStateChanged(user => {
 // Export types that exists in Firestore
 // This is not always necessary, but it's used in other examples
 const { Timestamp, GeoPoint } = firebase.firestore
-export { Timestamp, GeoPoint }
+export { Timestamp, GeoPoint, firebase }

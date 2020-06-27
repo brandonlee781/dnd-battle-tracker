@@ -29,9 +29,9 @@
 
 <script lang="ts">
 import { defineComponent, ref } from '@vue/composition-api'
-import firebase from 'firebase'
+import { firebase } from '@/db'
 import { useMutations, useState } from '@/use/vuex-hooks'
-import { AppState } from '../store'
+import { AppState } from '@/store'
 
 export default defineComponent({
   name: '',
