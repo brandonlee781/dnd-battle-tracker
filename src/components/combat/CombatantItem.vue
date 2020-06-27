@@ -1,9 +1,13 @@
 <template>
   <v-list-item :input-value="active" color="green" class="px-0">
     <v-list-item-content class="py-1 content">
-      <div class="item-title">
+      <div v-if="!editing" class="item-title">
         {{ combatant.name }}
         {{ combatant.count ? ` x${combatant.count} ` : null }}
+      </div>
+      <div v-else>
+        <v-text-field v-model="editedName" hide-details label="Name" />
+        <v-text-field v-model="editedCount" hide-details label="Count" />
       </div>
       <v-text-field
         :value="combatant.initiative"
@@ -39,8 +43,18 @@
           </v-btn>
         </template>
         <v-list>
+          <v-list-item v-if="!editing">
+            <v-btn text block @click="onEdit(combatant.id)">
+              Edit NPC
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="editing">
+            <v-btn text color="success" block @click="onSave">
+              Save NPC
+            </v-btn>
+          </v-list-item>
           <v-list-item>
-            <v-btn text color="red" @click="onDelete">
+            <v-btn text block color="red" @click="onDelete">
               Delete NPC
             </v-btn>
           </v-list-item>
@@ -51,9 +65,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
-import { useMutations } from '@/use/vuex-hooks'
-import { Character } from '../../store'
+import { defineComponent, ref, computed } from '@vue/composition-api'
+import { useMutations, useState } from '@/use/vuex-hooks'
+import { Character, AppState } from '../../store'
 
 interface CombatantItemProps {
   combatant: Character
@@ -78,16 +92,53 @@ export default defineComponent<CombatantItemProps>({
     },
   },
   setup(props) {
-    const { toggleDownedState, removeNpc } = useMutations({
+    const { npcs } = useState<AppState>({
+      npcs: state => state.npcs,
+    })
+    const { toggleDownedState, removeNpc, editNpc } = useMutations({
       toggleDownedState: 'TOGGLE_DOWNED_STATE',
       removeNpc: 'REMOVE_NPC',
+      editNpc: 'EDIT_NPC',
+    })
+
+    const editing = ref(null)
+    const editedName = computed({
+      get() {
+        return npcs.value.find(n => n.id === editing.value).name
+      },
+      set(val) {
+        editNpc({ id: editing.value, data: { name: val } })
+      },
+    })
+    const editedCount = computed({
+      get() {
+        return npcs.value.find(n => n.id === editing.value).count
+      },
+      set(val) {
+        editNpc({ id: editing.value, data: { count: val || 0 } })
+      },
     })
 
     const onDelete = () => {
       removeNpc({ id: props.combatantId })
     }
+    const onEdit = id => {
+      editing.value = id
+    }
+    const onSave = () => {
+      editing.value = null
+    }
 
-    return { toggleDownedState, removeNpc, onDelete }
+    return {
+      editing,
+      editedName,
+      editedCount,
+      toggleDownedState,
+      removeNpc,
+      onDelete,
+      onEdit,
+      onSave,
+    }
   },
 })
 </script>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import cuid from 'cuid'
 import { db } from '@/db'
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex)
 
@@ -10,6 +11,7 @@ export interface PC {
   name: string
   initiative: number
   downed: boolean
+  count?: null
 }
 export interface NPC extends PC {
   count?: number
@@ -161,6 +163,16 @@ export default new Vuex.Store<AppState>({
       }
       state.npcs.push(newNpc)
     },
+    EDIT_NPC(state, { data, id }: { data: Partial<NPC>; id: string }) {
+      const npcIndex = state.npcs.findIndex(n => n.id === id)
+      if (npcIndex >= 0) {
+        const editedNpc = {
+          ...state.npcs[npcIndex],
+          ...data,
+        }
+        Vue.set(state.npcs, npcIndex, editedNpc)
+      }
+    },
     REMOVE_NPC(state, { id }) {
       const index = state.npcs.findIndex(n => n.id === id)
       if (index >= 0) {
@@ -266,4 +278,5 @@ export default new Vuex.Store<AppState>({
     },
   },
   modules: {},
+  plugins: [createPersistedState()],
 })
