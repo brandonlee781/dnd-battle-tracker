@@ -18,35 +18,43 @@ export default {
           const chart = this.$data._chart
           const mousePoint = Chart.helpers.getRelativePosition(e, chart)
           const clickX = chart.scales['x-axis-0'].getValueForPixel(mousePoint.x)
-          const clickedLabel = chart.scales['x-axis-0'].ticks[clickX]
-          if (clickedLabel && mousePoint.y < 260) {
-            this.$emit('click:x-axis', clickedLabel)
+          const clickY = chart.scales['y-axis-0'].getValueForPixel(mousePoint.y)
+          const clickedXLabel = chart.scales['x-axis-0'].ticks[clickX]
+          const clickedYLabel = chart.scales['y-axis-0'].ticks[clickY]
+          if (clickedXLabel && mousePoint.y < 260) {
+            this.$emit('click:x-axis', clickedXLabel)
+          }
+          if (clickedYLabel) {
+            this.$emit('click:y-axis', clickedYLabel)
           }
         },
         legend: {
           ...this.options.legend,
-          onHover: function(event, legendItem) {
-            const chart = this.chart
-            const { datasets } = chart.data
+          // onClick: (event, legendItem) => {
+          //   this.$emit('click:legend', legendItem)
+          // },
+          // onHover: function(event, legendItem) {
+          //   const chart = this.chart
+          //   const { datasets } = chart.data
 
-            datasets.forEach((set, index) => {
-              if (index !== legendItem.datasetIndex) {
-                set.backgroundColor = `${set.backgroundColor}44`
-              }
-            })
-            chart.update()
-          },
-          onLeave: function(event, legendItem) {
-            const chart = this.chart
-            const { datasets } = chart.data
+          //   datasets.forEach((set, index) => {
+          //     if (index !== legendItem.datasetIndex) {
+          //       set.backgroundColor = `${set.backgroundColor}44`
+          //     }
+          //   })
+          //   chart.update()
+          // },
+          // onLeave: function(event, legendItem) {
+          //   const chart = this.chart
+          //   const { datasets } = chart.data
 
-            datasets.forEach((set, index) => {
-              if (index !== legendItem.datasetIndex) {
-                set.backgroundColor = `${set.backgroundColor.slice(0, -2)}`
-              }
-            })
-            chart.update()
-          },
+          //   datasets.forEach((set, index) => {
+          //     if (index !== legendItem.datasetIndex) {
+          //       set.backgroundColor = `${set.backgroundColor.slice(0, -2)}`
+          //     }
+          //   })
+          //   chart.update()
+          // },
         },
         animation: {
           ...this.options.animation,

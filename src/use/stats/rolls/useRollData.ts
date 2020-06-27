@@ -1,6 +1,6 @@
 import { Ref, computed, ComputedRef } from '@vue/composition-api'
 import { PC, RollData } from '@/store'
-import { DisplayType } from '../useBattleData'
+import { DisplayType, getNewColor } from '../useBattleData'
 import capitalize from '@/helpers/capitalize'
 import { nonNullable } from '../useBattleTableData'
 
@@ -45,6 +45,8 @@ interface UseRollDataParams {
   rolls: Ref<RollData[]>
   display: Ref<DisplayType>
   selectedSkill: Ref<string | null>
+  selectedSave: Ref<string | null>
+  selectedPlayer: Ref<PC | null>
 }
 
 interface RollSeries {
@@ -81,12 +83,17 @@ export default function({
   rolls,
   display,
   selectedSkill,
+  selectedSave,
+  selectedPlayer,
 }: UseRollDataParams) {
+  const players = computed(() =>
+    selectedPlayer.value ? [selectedPlayer.value] : party
+  )
   const skillData: ComputedRef<RollCollection[]> = computed(() => {
     return rolls.value
       .filter(c => c.type === 'skill')
       .map(roll => {
-        const player = party.find(p => p.id === roll.player)
+        const player = players.value.find(p => p.id === roll.player)
         if (player) {
           return {
             ...roll,
@@ -100,7 +107,7 @@ export default function({
     return rolls.value
       .filter(c => c.type === 'save')
       .map(roll => {
-        const player = party.find(p => p.id === roll.player)
+        const player = players.value.find(p => p.id === roll.player)
         if (player) {
           return {
             ...roll,
@@ -123,9 +130,9 @@ export default function({
     },
     title: {
       display: true,
-      text: `${
-        selectedSkill.value ? selectedSkill.value : 'Skill'
-      } Roll ${capitalize(display.value)}`,
+      text: `${selectedSkill.value || 'Skill'} Roll ${capitalize(
+        display.value
+      )}`,
       fontColor: '#ccc',
     },
     scales: {
@@ -151,12 +158,12 @@ export default function({
   const skillDataSets = computed(() => {
     if (selectedSkill.value) {
       return {
-        labels: party.map(p => p.name),
+        labels: players.value.map(p => p.name),
         datasets: [
           {
             label: `${capitalize(display.value)} ${selectedSkill.value} Rolls`,
-            backgroundColor: colors.slice(0, party.length),
-            data: party.map(
+            backgroundColor: players.value.map(p => getNewColor(p.name)),
+            data: players.value.map(
               pc =>
                 getDisplay(
                   skillData.value.filter(
@@ -173,10 +180,10 @@ export default function({
     } else {
       return {
         labels: skills,
-        datasets: party.map((pc, i) => {
+        datasets: players.value.map(pc => {
           return {
             label: `${pc.name}'s Rolls`,
-            backgroundColor: colors[i],
+            backgroundColor: getNewColor(pc.name),
             data: skills.map(skill => {
               return (
                 getDisplay(
@@ -192,7 +199,7 @@ export default function({
       }
     }
   })
-  const saveOptions = {
+  const saveOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
     legend: {
@@ -203,7 +210,7 @@ export default function({
     },
     title: {
       display: true,
-      text: 'Save Rolls',
+      text: `${selectedSave.value || 'Save'} Roll ${capitalize(display.value)}`,
       fontColor: '#ccc',
     },
     scales: {
@@ -224,29 +231,50 @@ export default function({
         },
       ],
     },
-  }
+  }))
   const saveDataSets = computed(() => {
     const labels = saves
-    const datasets = party.map((pc, i) => {
+    if (selectedSave.value) {
       return {
-        label: `${pc.name}'s Rolls`,
-        backgroundColor: colors[i],
-        data: saves.map(save => {
-          return (
-            getDisplay(
-              saveData.value.filter(
-                roll => roll.player.id === pc.id && roll.save === save
-              ),
-              display.value
-            ) || 0
-          )
+        labels: players.value.map(p => p.name),
+        datasets: [
+          {
+            label: `${capitalize(display.value)} ${selectedSave.value} Rolls`,
+            backgroundColor: players.value.map(p => getNewColor(p.name)),
+            data: players.value.map(
+              pc =>
+                getDisplay(
+                  saveData.value.filter(
+                    roll =>
+                      roll.player.id === pc.id &&
+                      roll.save === selectedSave.value
+                  ),
+                  display.value
+                ) || 0
+            ),
+          },
+        ],
+      }
+    } else {
+      return {
+        labels,
+        datasets: players.value.map(pc => {
+          return {
+            label: `${pc.name}'s Rolls`,
+            backgroundColor: getNewColor(pc.name),
+            data: saves.map(save => {
+              return (
+                getDisplay(
+                  saveData.value.filter(
+                    roll => roll.player.id === pc.id && roll.save === save
+                  ),
+                  display.value
+                ) || 0
+              )
+            }),
+          }
         }),
       }
-    })
-
-    return {
-      labels,
-      datasets,
     }
   })
 

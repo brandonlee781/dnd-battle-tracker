@@ -2,15 +2,19 @@
   <div>
     <RollChart
       :selected.sync="filterSkill"
+      :player.sync="filterPlayer"
       :chart-data="skillChartData.chartData"
       :options="skillChartData.options"
       :height="350"
       :horizontal="!!filterSkill"
     />
     <RollChart
+      :selected.sync="filterSave"
+      :player.sync="filterPlayer"
       :chart-data="saveChartData.chartData"
       :options="saveChartData.options"
       :height="350"
+      :horizontal="!!filterSave"
     />
     <v-data-table :headers="headers" :items="rolls" dense>
       <template v-slot:top>
@@ -96,6 +100,8 @@ export default defineComponent<{ display: DisplayType }>({
       display,
       rolls: collectionData,
       selectedSkill: filterSkill,
+      selectedSave: filterSave,
+      selectedPlayer: filterPlayer,
     })
 
     const headers: DataTableHeader[] = [

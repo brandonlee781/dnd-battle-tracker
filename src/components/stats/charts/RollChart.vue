@@ -29,8 +29,26 @@
 import { defineComponent } from '@vue/composition-api'
 import BarChart from './BarChart.vue'
 import HorizontalBarChart from './HorizontalBarChart.vue'
+import { AppState, PC } from '../../../store'
+import { ChartData, ChartOptions } from 'chart.js'
 
-export default defineComponent({
+interface LegendClickEvent {
+  datasetIndex: number
+  fillStyle: string
+  hidden: boolean
+  text: string
+}
+
+interface RollChartProps {
+  selected: string
+  player: PC
+  chartData: ChartData
+  options: ChartOptions
+  height: number
+  horizontal: boolean
+}
+
+export default defineComponent<RollChartProps>({
   name: 'RollChart',
   components: {
     BarChart,
@@ -39,6 +57,10 @@ export default defineComponent({
   props: {
     selected: {
       type: String,
+      default: null,
+    },
+    player: {
+      type: Object,
       default: null,
     },
     chartData: {
@@ -58,13 +80,17 @@ export default defineComponent({
       default: false,
     },
   },
-  setup(props, { emit }) {
+  setup(props, { emit, root }) {
     const onLabelClick = label => {
       if (!props.horizontal) {
         emit('update:selected', label)
       }
     }
-    return { onLabelClick }
+    const onLegendClick = (val: LegendClickEvent) => {
+      const players = (root.$store.state as AppState).party
+      emit('update:player', players[val.datasetIndex])
+    }
+    return { onLabelClick, onLegendClick }
   },
 })
 </script>
