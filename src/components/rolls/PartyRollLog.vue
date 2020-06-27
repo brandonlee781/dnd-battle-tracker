@@ -2,15 +2,18 @@
   <v-card>
     <v-card-text>
       <v-list dense>
-        <v-list-item v-for="roll in rolls" :key="roll.id">
-          <span class="title">
-            {{ roll.date }}:
-            {{ roll.player.name }}
-            rolled a {{ roll.roll }} on
-            {{ roll.skill || roll.save | withArticle }}
-            {{ roll.skill ? 'check' : 'save' }}.
-          </span>
-        </v-list-item>
+        <template v-for="(roll, index) in rolls">
+          <v-list-item :key="roll.id">
+            <span class="title">
+              <span class="date">{{ roll.date }}:</span>
+              {{ roll.player.name }}
+              rolled a {{ roll.roll }} on
+              {{ roll.skill || roll.save | withArticle }}
+              {{ roll.skill ? 'check' : 'save' }}.
+            </span>
+          </v-list-item>
+          <v-divider :key="index" />
+        </template>
       </v-list>
     </v-card-text>
   </v-card>
@@ -47,4 +50,12 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.title {
+  color: #eee;
+}
+.title .date {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+</style>

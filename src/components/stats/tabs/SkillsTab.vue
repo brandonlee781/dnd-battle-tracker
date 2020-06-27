@@ -15,7 +15,7 @@
     <v-data-table :headers="headers" :items="rolls" dense>
       <template v-slot:top>
         <div class="filter-row">
-          <v-text-field v-model="filterText" label="Filter" class="mx-4" />
+          <v-text-field v-model="filterText" label="Filter" />
           <v-select
             v-model="filterPlayer"
             :items="party"
@@ -184,7 +184,13 @@ export default defineComponent<{ display: DisplayType }>({
 .filter-row {
   display: grid;
   gap: 8px;
-  grid-template-columns: 1fr 150px 150px 150px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 0 8px;
+  @media (min-width: 1264px) {
+    grid-template-columns: 1fr 150px 150px 150px;
+    grid-template-rows: 1fr;
+  }
 }
 
 .skill-chart {
