@@ -66,10 +66,6 @@ export default defineComponent<RadarChartsProps>({
       type: Array,
       default: () => [],
     },
-    colors: {
-      type: Array,
-      default: () => [],
-    },
   },
   setup(props) {
     const selectedCombatant: Ref<Character | null> = ref(null)
@@ -78,7 +74,6 @@ export default defineComponent<RadarChartsProps>({
       battles,
       field: props.field,
       selectedCombatant: selectedCombatant,
-      colors: props.colors,
     })
 
     const selectCombatant = combatant => {

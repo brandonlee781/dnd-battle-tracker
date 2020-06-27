@@ -1,4 +1,4 @@
-import { FieldType } from './useBattleData'
+import { FieldType, getNewColor } from './useBattleData'
 import { Battle } from '@/store'
 import { ComputedRef, computed, Ref } from '@vue/composition-api'
 import { capitalize } from 'lodash'
@@ -6,10 +6,9 @@ import { capitalize } from 'lodash'
 interface UseRoundDataProps {
   battles: Ref<Battle[]> | ComputedRef<Battle[]>
   field: FieldType
-  colors: string[]
 }
 
-export default function({ battles, field, colors }: UseRoundDataProps) {
+export default function({ battles, field }: UseRoundDataProps) {
   const battle = computed(() => battles.value[0])
   const maxRounds = computed(() => {
     let count = 0
@@ -27,7 +26,7 @@ export default function({ battles, field, colors }: UseRoundDataProps) {
     combatants?.forEach((combatant, i) => {
       roundValues[combatant.id] = {
         label: `${combatant.name} ${field}`,
-        backgroundColor: colors[i],
+        backgroundColor: getNewColor(combatant.name),
         data: [],
       }
       for (let i = 1; i <= maxRounds.value; i++) {

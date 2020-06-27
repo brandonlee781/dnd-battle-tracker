@@ -6,6 +6,7 @@ import useCombatantData from './useCombatantData'
 import useFightData from './useFightData'
 import useRoundData from './useRoundData'
 import { colors } from './rolls/useRollData'
+import store from '@/store'
 
 export interface BattleData {
   text: string
@@ -20,23 +21,37 @@ interface UseBattleDataProps {
   field?: FieldType
   display?: Ref<DisplayType>
   selectedCombatant?: Ref<Character | null>
-  colors?: string[]
 }
 
-export const getColors = length =>
-  new Array(length).fill(0).map((u, i) => {
-    if (colors[i]) {
-      return colors[i]
-    }
-    return `#${Math.floor(Math.random() * 16777215).toString(16)}`
-  })
+function intToRGB(j) {
+  let hash = 0
+  if (j.length === 0) return ''
+  for (let i = 0; i < j.length; i++) {
+    hash = j.charCodeAt(i) + ((hash << 5) - hash)
+    hash = hash & hash
+  }
+  const rgb = [0, 0, 0]
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 255
+    rgb[i] = value
+  }
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+}
+
+export function getNewColor(name) {
+  const partyIndex = store.state.party.findIndex(p => p.name === name)
+  if (partyIndex >= 0) {
+    return colors[partyIndex]
+  }
+  const rgb = intToRGB(name)
+  return rgb
+}
 
 export default function({
   battles = ref([]),
   field = 'damage',
   display = ref('total'),
   selectedCombatant = ref(null),
-  colors = [],
 }: UseBattleDataProps = {}) {
   // get all combatants
   const combatants = computed(() => {
@@ -47,7 +62,7 @@ export default function({
   })
 
   const backgroundColors = computed(() =>
-    colors.length ? colors : getColors(combatants.value.length)
+    combatants.value.map(({ name }) => getNewColor(name))
   )
 
   const combatantData = useFightData({
@@ -60,7 +75,6 @@ export default function({
     combatants,
     battles,
     field,
-    colors: backgroundColors,
     selectedCombatant,
   })
 
@@ -98,7 +112,9 @@ export default function({
     return {
       options,
       chartData: {
-        labels: combatants.value.map(c => c.name),
+        labels: combatants.value.map(
+          c => `${c.name}${c.count ? ` x${c?.count}` : ''}`
+        ),
         datasets: [
           {
             backgroundColor: backgroundColors.value,
@@ -119,7 +135,6 @@ export default function({
         roundData.value = useRoundData({
           battles,
           field,
-          colors: backgroundColors.value,
         })
       }
     },
@@ -132,6 +147,5 @@ export default function({
     againstData,
     fromData,
     roundData,
-    colors: backgroundColors.value,
   }
 }

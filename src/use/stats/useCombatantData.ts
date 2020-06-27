@@ -1,14 +1,14 @@
 import { Ref, ComputedRef, computed } from '@vue/composition-api'
 import { Battle, Character } from '@/store'
-import { FieldType } from './useBattleData'
+import { FieldType, getNewColor } from './useBattleData'
 import { getCombatantsTurns } from './useFightData'
 import capitalize from '@/helpers/capitalize'
+import { nonNullable } from './useBattleTableData'
 
 interface UseCombatantsDataProps {
   battles: Ref<Battle[]>
   combatants: ComputedRef<Character[]>
   field: FieldType
-  colors: Ref<string[]>
   selectedCombatant: Ref<Character | null>
 }
 
@@ -29,64 +29,108 @@ const getTargetObject = (
   return targets
 }
 
+function getSelectedColor(name) {
+  const col = getNewColor(name)
+  const match = col.match(/rgb\((.*)\)/i)
+  if (match?.length && match?.length > 1) {
+    return {
+      backgroundColor: `rgba(${match[1]}, 0.3)`,
+      pointBackgroundColor: col,
+      pointBorderColor: '#bbb',
+      borderColor: col,
+    }
+  }
+  return {
+    backgroundColor: `${col}22`,
+    pointBackgroundColor: col,
+    pointBorderColor: '#bbb',
+    borderColor: col,
+  }
+}
+
 export default function({
   combatants,
   battles,
   field,
-  colors,
   selectedCombatant,
 }: UseCombatantsDataProps) {
-  const againstSeries = computed(() =>
-    combatants.value.map(c => {
-      const turns = getCombatantsTurns(battles.value, c)
-      const targets = getTargetObject(
-        combatants.value,
-        selectedCombatant.value?.id || ''
-      )
+  const againstData = computed(() => {
+    const selectedId = selectedCombatant.value?.id
+    if (selectedId) {
+      const chars = combatants.value
+        .map(c => c.id)
+        .filter(id => id !== selectedId)
+      const turnsAsChar = battles.value
+        .map(b => b.turns)
+        .reduce((a, b) => a.concat(b), [])
+        .filter(turn => turn.character.id === selectedId)
+        .map(turn => {
+          const turnWithActions = {
+            ...turn,
+            action: turn.action.filter(a => a[field] > 0),
+          }
+          if (turnWithActions.action.length) {
+            return turnWithActions
+          }
+          return null
+        })
+        .filter(nonNullable)
 
-      Object.keys(targets).forEach(targetId => {
-        const actions = turns
-          .map(t => t.action)
+      return chars.map(charId => {
+        const actions = turnsAsChar
+          .map(turn => turn.action)
           .reduce((a, b) => a.concat(b), [])
-          .filter(action => action.target?.id === targetId)
-        targets[targetId] = actions.reduce((a, b) => a + b[field], 0)
+          .filter(ac => {
+            return ac.target?.id === charId
+          })
+        if (actions.length) {
+          return actions.reduce((a, b) => a + b[field], 0)
+        }
+        return 0
       })
-
-      return {
-        id: c.id,
-        name: `${c.name} ${capitalize(field)} outgoing`, // eslint-disable-line
-        data: Object.keys(targets).map(target => targets[target]),
-      }
-    })
-  )
-  const fromSeries = computed(() =>
-    combatants.value.map(c => {
-      const chars = getTargetObject(
-        combatants.value,
-        selectedCombatant.value?.id || ''
-      )
+    }
+    return []
+  })
+  const fromData = computed(() => {
+    const selectedId = selectedCombatant.value?.id
+    if (selectedId) {
+      const chars = combatants.value
+        .map(c => c.id)
+        .filter(id => id !== selectedId)
       const turnsAsTarget = battles.value
         .map(b => b.turns)
         .reduce((a, b) => a.concat(b), [])
-        .filter(turn => {
-          const actions = turn.action.filter(a => a.target?.id === c.id)
-          return actions.length
+        .map(turn => {
+          // filter out all actions that aren't the selected combatant
+          // and aren't the requested field
+          const turnWithActions = {
+            ...turn,
+            action: turn.action.filter(
+              a => a.target?.id === selectedId && a[field] > 0
+            ),
+          }
+          if (turnWithActions.action.length) {
+            return turnWithActions
+          }
+          return null
         })
-        .map(turn => ({
-          ...turn,
-          action: turn.action.filter(a => a.target?.id === c.id),
-        }))
-      turnsAsTarget.forEach(turn => {
-        chars[turn.character.id] = turn.action.reduce((a, b) => a + b[field], 0)
-      })
+        .filter(nonNullable)
 
-      return {
-        id: c.id,
-        name: `${c.name} ${capitalize(field)} incoming`, // eslint-disable-line
-        data: Object.keys(chars).map(char => chars[char]),
-      }
-    })
-  )
+      return chars.map(charId => {
+        const actions = turnsAsTarget
+          .filter(turn => {
+            return turn.character.id === charId
+          })
+          .map(t => t.action)
+          .reduce((a, b) => a.concat(b), [])
+        if (actions.length) {
+          return actions.reduce((a, b) => a + b[field], 0)
+        }
+        return 0
+      })
+    }
+    return []
+  })
   const againstChartData = computed(() => {
     if (!selectedCombatant.value) {
       return {
@@ -97,7 +141,7 @@ export default function({
     const index = combatants.value.findIndex(
       c => c.id === selectedCombatant.value?.id
     )
-    const col = colors.value[index]
+
     const curr = combatants.value[index]
     return {
       labels: combatants.value
@@ -106,13 +150,8 @@ export default function({
       datasets: [
         {
           label: curr.name,
-          backgroundColor: `${col}22`,
-          pointBackgroundColor: col,
-          pointBorderColor: '#bbb',
-          borderColor: col,
-          data: againstSeries.value
-            .filter(s => s.id == selectedCombatant.value?.id)
-            .map(j => j.data)[0],
+          ...getSelectedColor(selectedCombatant.value.name),
+          data: againstData.value,
         },
       ],
     }
@@ -136,13 +175,8 @@ export default function({
       datasets: [
         {
           label: curr.name,
-          backgroundColor: `${colors.value[index]}22`,
-          pointBackgroundColor: colors.value[index],
-          pointBorderColor: '#bbb',
-          borderColor: colors.value[index],
-          data: fromSeries.value
-            .filter(s => s.id == selectedCombatant.value?.id)
-            .map(j => j.data)[0],
+          ...getSelectedColor(selectedCombatant.value.name),
+          data: fromData.value,
         },
       ],
     }
@@ -177,7 +211,7 @@ export default function({
         ...options,
         title: {
           display: true,
-          text: `Damage Against Target`,
+          text: `${capitalize(field)} Against Target`,
           fontColor: '#ccc',
         },
       },
@@ -187,7 +221,7 @@ export default function({
         ...options,
         title: {
           display: true,
-          text: `Damage From Target`,
+          text: `${capitalize(field)} From Target`,
           fontColor: '#ccc',
         },
       },

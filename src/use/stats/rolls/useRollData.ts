@@ -203,7 +203,7 @@ export default function({
     },
     title: {
       display: true,
-      text: 'Skill Rolls',
+      text: 'Save Rolls',
       fontColor: '#ccc',
     },
     scales: {

@@ -1,62 +1,64 @@
 <template>
-  <v-card>
-    <div class="tab-row">
-      <v-tabs
-        v-model="tab"
-        @change="tab === 2 ? (displayType = 'average') : null"
-      >
-        <v-tab v-for="item in tabItems" :key="item.value">{{
-          item.text
-        }}</v-tab>
-        <v-spacer />
-        <div class="display-select">
-          <v-menu offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                outlined
-                color="primary"
-                dark
-                v-bind="attrs"
-                v-on="on"
-                class="ma-2"
-              >
-                <span class="full-select">
-                  {{ displayItems.find(i => i.value === displayType).text }}
-                  <v-icon>mdi-menu-down</v-icon>
-                </span>
-                <v-icon class="filter-icon">mdi-filter-variant</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                v-for="(item, index) in displayItems"
-                :key="index"
-                @click="displayType = item.value"
-              >
-                <v-list-item-title>{{ item.text }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-          <!-- <v-select
-            v-model="displayType"
-            :items="tab !== 2 ? displayItems : displayItems.slice(1, 3)"
-            label="Data Display"
-          ></v-select> -->
-        </div>
-      </v-tabs>
-    </div>
-    <v-tabs-items v-if="data && data.length" v-model="tab">
-      <v-tab-item>
-        <DamageCharts :data="data" :display="displayType" />
-      </v-tab-item>
-      <v-tab-item>
-        <HealingCharts :data="data" :display="displayType" />
-      </v-tab-item>
-      <v-tab-item>
-        <SkillsCharts :display="displayType" />
-      </v-tab-item>
-    </v-tabs-items>
-  </v-card>
+  <div class="wrapper">
+    <v-card class="card">
+      <div class="tab-row">
+        <v-tabs
+          v-model="tab"
+          @change="tab === 2 ? (displayType = 'average') : null"
+        >
+          <v-tab v-for="item in tabItems" :key="item.value">{{
+            item.text
+          }}</v-tab>
+          <v-spacer />
+          <div class="display-select">
+            <v-menu offset-y>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  outlined
+                  color="primary"
+                  dark
+                  v-bind="attrs"
+                  v-on="on"
+                  class="ma-2"
+                >
+                  <span class="full-select">
+                    {{ displayItems.find(i => i.value === displayType).text }}
+                    <v-icon>mdi-menu-down</v-icon>
+                  </span>
+                  <v-icon class="filter-icon">mdi-filter-variant</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  v-for="(item, index) in displayItems"
+                  :key="index"
+                  @click="displayType = item.value"
+                >
+                  <v-list-item-title>{{ item.text }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+            <!-- <v-select
+              v-model="displayType"
+              :items="tab !== 2 ? displayItems : displayItems.slice(1, 3)"
+              label="Data Display"
+            ></v-select> -->
+          </div>
+        </v-tabs>
+      </div>
+      <v-tabs-items v-if="data && data.length" v-model="tab">
+        <v-tab-item>
+          <DamageTab :data="data" :display="displayType" />
+        </v-tab-item>
+        <v-tab-item>
+          <HealingTab :data="data" :display="displayType" />
+        </v-tab-item>
+        <v-tab-item>
+          <SkillsTab :display="displayType" />
+        </v-tab-item>
+      </v-tabs-items>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -65,16 +67,16 @@ import useCollection from '@/use/useCollection'
 import { DisplayType } from '@/use/stats/useBattleData'
 import { Battle } from '@/store'
 
-import DamageCharts from '@/components/stats/charts/DamageCharts.vue'
-import HealingCharts from '@/components/stats/charts/HealingCharts.vue'
-import SkillsCharts from '@/components/stats/charts/SkillsCharts.vue'
+import DamageTab from '@/components/stats/tabs/DamageTab.vue'
+import HealingTab from '@/components/stats/tabs/HealingTab.vue'
+import SkillsTab from '@/components/stats/tabs/SkillsTab.vue'
 
 export default defineComponent({
   name: 'BattleStats',
   components: {
-    DamageCharts,
-    HealingCharts,
-    SkillsCharts,
+    DamageTab,
+    HealingTab,
+    SkillsTab,
   },
   props: {
     battle: {
@@ -90,11 +92,15 @@ export default defineComponent({
       { value: 'rolls', text: 'Rolls' },
     ])
     const displayType: Ref<DisplayType> = ref('total')
-    const displayItems = [
-      { text: 'Total', value: 'total' },
-      { text: 'Average', value: 'average' },
-      { text: 'Highest', value: 'high' },
-    ]
+    const displayItems = computed(() => {
+      const items = [
+        { text: 'Total', value: 'total' },
+        { text: 'Average', value: 'average' },
+        { text: 'Highest', value: 'high' },
+      ]
+      if (tab.value === 2) return items.slice(1)
+      return items
+    })
     const { collectionData: battles } = useCollection<Battle>('battles', {
       onMounted: true,
     })
@@ -111,6 +117,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  max-height: calc(100vh - 48px);
+  overflow-y: scroll;
+}
+.card {
+  width: 100%;
+}
 .tab-row {
   display: flex;
   flex-flow: row nowrap;
