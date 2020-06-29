@@ -1,5 +1,6 @@
 import { Battle, Character } from '@/store'
 import uniqBy from 'lodash/uniqBy'
+import Color from 'color'
 import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
 
 import useCombatantData from './useCombatantData'
@@ -62,6 +63,7 @@ export default function({
 
   const barChartData = computed(() => {
     const options = {
+      id: 'battleData',
       responsive: true,
       maintainAspectRatio: false,
       legend: {
@@ -92,6 +94,46 @@ export default function({
           },
         ],
       },
+      plugins: {
+        datalabels: {
+          labels: {
+            value: {
+              color: function(ctx) {
+                const color = Color(
+                  ctx.dataset.backgroundColor[ctx.dataIndex]
+                ).luminosity()
+                if (color < 0.5) {
+                  return '#eee'
+                } else {
+                  return '#333'
+                }
+              },
+              formatter: function(value) {
+                if (value !== 0) {
+                  return value
+                }
+                return ''
+              },
+            },
+            total: {
+              color: '#eee',
+              anchor: 'end',
+              align: 'end',
+              clip: true,
+              formatter: function(value, ctx) {
+                const total = ctx.chart.$totalizer.totals[ctx.dataIndex]
+                if (total > 0) {
+                  return total
+                }
+                return ''
+              },
+              display: function(ctx) {
+                return ctx.datasetIndex === ctx.chart.$totalizer.utmost
+              },
+            },
+          },
+        },
+      },
     }
     let datasets
     if (display.value === 'total') {
@@ -101,9 +143,10 @@ export default function({
           max = v.length
         }
       })
-      datasets = new Array(max).fill(0).map(() => ({
+      datasets = new Array(max).fill(0).map((v, i) => ({
         label: '',
         backgroundColor: [],
+        stackLabel: `Stack ${i}`,
         data: [],
       }))
       /**

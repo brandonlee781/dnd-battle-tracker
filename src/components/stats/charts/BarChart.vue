@@ -1,5 +1,6 @@
 <script>
 import { Bar, mixins } from 'vue-chartjs'
+import 'chartjs-plugin-datalabels'
 import Chart from 'chart.js'
 const { reactiveProp } = mixins
 export default {
@@ -8,6 +9,26 @@ export default {
   name: 'BarChart',
   props: ['chartData', 'options'],
   mounted() {
+    this.addPlugin({
+      id: 'totalizer',
+      beforeUpdate: chart => {
+        let utmost = 0
+        const totals = {}
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          if (chart.isDatasetVisible(datasetIndex)) {
+            utmost = datasetIndex
+            dataset.data.forEach((value, index) => {
+              totals[index] = (totals[index] || 0) + value
+            })
+          }
+        })
+
+        chart.$totalizer = {
+          utmost: utmost,
+          totals: totals,
+        }
+      },
+    })
     this.renderChart(this.chartData, this.mergedOptions)
   },
   computed: {
@@ -55,31 +76,6 @@ export default {
           //   })
           //   chart.update()
           // },
-        },
-        animation: {
-          ...this.options.animation,
-          duration: 1,
-          onComplete: function() {
-            const chartInstance = this.chart,
-              ctx = chartInstance.ctx
-            ctx.font = Chart.helpers.fontString(
-              Chart.defaults.global.defaultFontSize,
-              Chart.defaults.global.defaultFontStyle,
-              Chart.defaults.global.defaultFontFamily
-            )
-            ctx.textAlign = 'center'
-            ctx.textBaseline = 'bottom'
-
-            this.data.datasets.forEach(function(dataset, i) {
-              const meta = chartInstance.controller.getDatasetMeta(i)
-              meta.data.forEach(function(bar, index) {
-                const data = Math.round(dataset.data[index])
-                if (data !== 0) {
-                  ctx.fillText(data, bar._model.x, bar._model.y - 5)
-                }
-              })
-            })
-          },
         },
       }
     },
