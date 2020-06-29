@@ -185,6 +185,21 @@ export default function({
         color: 'rgba(255, 255, 255, 0.2)',
       },
     },
+    plugins: {
+      datalabels: {
+        color: '#eee',
+        backgroundColor: '#333',
+        align: 'top',
+        offset: 4,
+        formatter: function(val) {
+          return Math.round(val)
+        },
+        display: function(ctx) {
+          const value = ctx.dataset.data[ctx.dataIndex]
+          return value > 0
+        },
+      },
+    },
   }
   return {
     againstData: {
@@ -193,7 +208,7 @@ export default function({
         ...options,
         title: {
           display: true,
-          text: `${capitalize(field)} Against Target`,
+          text: `Outgoing ${capitalize(field)} per Target`,
           fontColor: '#ccc',
         },
       },
@@ -203,7 +218,7 @@ export default function({
         ...options,
         title: {
           display: true,
-          text: `${capitalize(field)} From Target`,
+          text: `Incoming ${capitalize(field)} per Target`,
           fontColor: '#ccc',
         },
       },

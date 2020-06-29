@@ -154,6 +154,19 @@ export default function({
         },
       ],
     },
+    plugins: {
+      datalabels: {
+        color: '#eee',
+        anchor: 'end',
+        align: 'end',
+        formatter: function(val) {
+          if (val > 0) {
+            return Math.round(val)
+          }
+          return ''
+        },
+      },
+    },
   }))
 
   const skillDataSets = computed(() => {
@@ -231,6 +244,17 @@ export default function({
           },
         },
       ],
+    },
+    plugins: {
+      datalabels: {
+        color: '#eee',
+        formatter: function(val) {
+          if (val > 0) {
+            return Math.round(val)
+          }
+          return ''
+        },
+      },
     },
   }))
   const saveDataSets = computed(() => {
