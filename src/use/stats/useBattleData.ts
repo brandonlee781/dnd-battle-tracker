@@ -6,7 +6,8 @@ import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
 import useCombatantData from './useCombatantData'
 import useFightData from './useFightData'
 import useRoundData from './useRoundData'
-import { ChartOptions, ChartData } from 'chart.js'
+import { ChartOptions, ChartData, Chart } from 'chart.js'
+import * as ChartDataLabel from 'chartjs-plugin-datalabels'
 import capitalize from '@/helpers/capitalize'
 import { getNewColor } from '@/helpers/colors'
 
@@ -28,6 +29,16 @@ interface UseBattleDataProps {
 interface RoundData {
   options: ComputedRef<ChartOptions> | {}
   chartData: ComputedRef<ChartData> | {}
+}
+
+interface LocalChart extends Chart {
+  $totalizer?: {
+    utmost: number
+    totals: number[]
+  }
+}
+interface LabelContext extends Omit<ChartDataLabel.Context, 'chart'> {
+  chart: LocalChart
 }
 
 export default function({
@@ -99,7 +110,7 @@ export default function({
             value: {
               color: function(ctx) {
                 const color = Color(
-                  ctx.dataset.backgroundColor[ctx.dataIndex]
+                  ctx?.dataset?.backgroundColor?.[ctx.dataIndex]
                 ).luminosity()
                 if (color < 0.5) {
                   return '#eee'
@@ -119,15 +130,15 @@ export default function({
               anchor: 'end',
               align: 'end',
               clip: true,
-              formatter: function(value, ctx) {
-                const total = ctx.chart.$totalizer.totals[ctx.dataIndex]
+              formatter: function(value, ctx: LabelContext) {
+                const total = ctx.chart.$totalizer?.totals[ctx.dataIndex] || 0
                 if (total > 0) {
                   return total
                 }
                 return ''
               },
-              display: function(ctx) {
-                return ctx.datasetIndex === ctx.chart.$totalizer.utmost
+              display: function(ctx: LabelContext) {
+                return ctx.datasetIndex === ctx.chart.$totalizer?.utmost
               },
             },
           },
