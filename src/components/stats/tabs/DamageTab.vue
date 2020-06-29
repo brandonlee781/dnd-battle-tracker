@@ -1,13 +1,16 @@
 <template>
   <div>
-    <BarChart
-      :options="barChartData.options"
-      :chartData="barChartData.chartData"
-      :height="350"
-    />
-
+    <div>
+      <BarChart
+        class="chart-wrapper"
+        :options="barChartData.options"
+        :chartData="barChartData.chartData"
+        :height="350"
+      />
+    </div>
     <BarChart
       v-if="data.length === 1"
+      class="chart-wrapper"
       :options="roundData.options"
       :chartData="roundData.chartData"
       :height="350"
@@ -69,4 +72,8 @@ export default defineComponent<{ data: Battle[]; display: DisplayType }>({
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chart-wrapper {
+  height: 350px;
+}
+</style>
