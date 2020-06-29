@@ -1,8 +1,9 @@
 import { Ref, computed, ComputedRef } from '@vue/composition-api'
 import { PC, RollData } from '@/store'
-import { DisplayType, getNewColor } from '../useBattleData'
+import { DisplayType } from '../useBattleData'
 import capitalize from '@/helpers/capitalize'
 import { nonNullable } from '../useBattleTableData'
+import { getNewColor } from '@/helpers/colors'
 
 export const skills = [
   'Acrobatics',
@@ -34,7 +35,7 @@ export const saves = [
   'Charisma',
 ]
 
-export const colors = ['#F44336', '#9C27B0', '#3F51B5', '#00BCD4', '#4CAF50']
+export const colors = ['#F44336', '#9C27B0', '#3F51B5', '#4CAF50', '#00BCD4']
 
 export interface RollCollection extends Omit<RollData, 'player'> {
   player: PC

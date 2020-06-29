@@ -30,15 +30,16 @@ function getAllTotal(
   battles: Battle[],
   c: Character,
   field: FieldType
-): BattleData {
+): BattleData[] {
   const totalObject = {
     text: c.name,
     value: 0,
   }
+  const turnArray: BattleData[] = []
   const turns = getCombatantsTurns(battles, c)
-  perAction(turns, a => (totalObject.value += a[field]))
+  perAction(turns, a => turnArray.push({ ...totalObject, value: a[field] }))
 
-  return totalObject
+  return turnArray
 }
 
 function getAllAverage(
@@ -80,7 +81,7 @@ function getAllHigh(
 }
 
 export default function({ battles, combatants, field }) {
-  const total = computed<BattleData[]>(() => {
+  const total = computed<BattleData[][]>(() => {
     return combatants.value.map(c => {
       return getAllTotal(battles.value, c, field)
     })

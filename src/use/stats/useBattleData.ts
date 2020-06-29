@@ -5,10 +5,9 @@ import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
 import useCombatantData from './useCombatantData'
 import useFightData from './useFightData'
 import useRoundData from './useRoundData'
-import { colors } from './rolls/useRollData'
-import store from '@/store'
 import { ChartOptions, ChartData } from 'chart.js'
 import capitalize from '@/helpers/capitalize'
+import { getNewColor } from '@/helpers/colors'
 
 export interface BattleData {
   text: string
@@ -28,30 +27,6 @@ interface UseBattleDataProps {
 interface RoundData {
   options: ComputedRef<ChartOptions> | {}
   chartData: ComputedRef<ChartData> | {}
-}
-
-function intToRGB(j) {
-  let hash = 0
-  if (j.length === 0) return ''
-  for (let i = 0; i < j.length; i++) {
-    hash = j.charCodeAt(i) + ((hash << 5) - hash)
-    hash = hash & hash
-  }
-  const rgb = [0, 0, 0]
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 255
-    rgb[i] = value
-  }
-  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
-}
-
-export function getNewColor(name) {
-  const partyIndex = store.state.party.findIndex(p => p.name === name)
-  if (partyIndex >= 0) {
-    return colors[partyIndex]
-  }
-  const rgb = intToRGB(name)
-  return rgb
 }
 
 export default function({
@@ -104,6 +79,7 @@ export default function({
             ticks: {
               fontColor: '#ccc',
             },
+            stacked: display.value === 'total',
           },
         ],
         yAxes: [
@@ -112,9 +88,58 @@ export default function({
             ticks: {
               fontColor: '#ccc',
             },
+            stacked: display.value === 'total',
           },
         ],
       },
+    }
+    let datasets
+    if (display.value === 'total') {
+      let max = 0
+      combatantData.total.value.forEach(v => {
+        if (v.length > max) {
+          max = v.length
+        }
+      })
+      datasets = new Array(max).fill(0).map(() => ({
+        label: '',
+        backgroundColor: [],
+        data: [],
+      }))
+      /**
+       * datasets: [
+       *  {
+       *    label: '0',
+       *    data: [chandra, demi, elryn, kal, val, ...]
+       *  },
+       *  {
+       *    label: '1',
+       *    data: [chandra, demi, elryn, kal, val, ...]
+       *  }
+       * ]
+       */
+      combatantData.total.value.forEach(totals => {
+        for (let i = 0; i < max; i++) {
+          const data = totals[i]
+          if (data) {
+            const lightenAmount = (0.5 / max) * i
+            datasets[i].backgroundColor.push(
+              getNewColor(data.text, lightenAmount)
+            )
+            datasets[i].data.push(data.value)
+          } else {
+            datasets[i].backgroundColor.push(getNewColor(`${i}`))
+            datasets[i].data.push(0)
+          }
+        }
+      })
+    } else {
+      datasets = [
+        {
+          backgroundColor: backgroundColors.value,
+          data: combatantData[display.value].value.map(t => t.value),
+        },
+      ]
     }
     return {
       options,
@@ -122,12 +147,7 @@ export default function({
         labels: combatants.value.map(
           c => `${c.name}${c.count ? ` x${c?.count}` : ''}`
         ),
-        datasets: [
-          {
-            backgroundColor: backgroundColors.value,
-            data: combatantData[display.value].value.map(t => t.value),
-          },
-        ],
+        datasets,
       },
     }
   })

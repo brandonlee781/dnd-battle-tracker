@@ -4,6 +4,7 @@
       <div v-if="!editing" class="item-title">
         {{ combatant.name }}
         {{ combatant.count ? ` x${combatant.count} ` : null }}
+        <span v-if="combatant.downed" class="downed">(Downed)</span>
       </div>
       <div v-else>
         <v-text-field v-model="editedName" hide-details label="Name" />
@@ -18,46 +19,62 @@
         @blur="e => $emit('setInitiative', +e.target.value)"
         @keypress.enter="e => $emit('setInitiative', +e.target.value)"
       />
-      <v-tooltip bottom>
-        <template #activator="{ on }">
-          <v-btn
-            v-on="on"
-            class="downed-button"
-            icon
-            @click="toggleDownedState({ id: combatant.id })"
-          >
-            <v-icon :color="combatant.downed ? 'red' : '#37474F'">
-              mdi-skull
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>
-          {{ combatant.name }} is {{ !combatant.downed ? 'not' : null }} Downed
-        </span>
-      </v-tooltip>
 
-      <v-menu v-if="combatant.id.length > 1">
+      <v-menu class="menu">
         <template v-slot:activator="{ on, attrs }">
           <v-btn dark icon v-bind="attrs" v-on="on">
             <v-icon>mdi-dots-vertical</v-icon>
           </v-btn>
         </template>
         <v-list>
-          <v-list-item v-if="!editing">
-            <v-btn text block @click="onEdit(combatant.id)">
-              Edit NPC
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="editing">
-            <v-btn text color="success" block @click="onSave">
-              Save NPC
-            </v-btn>
-          </v-list-item>
           <v-list-item>
-            <v-btn text block color="red" @click="onDelete">
-              Delete NPC
+            <v-btn
+              class="menu-button"
+              text
+              block
+              @click="toggleDownedState({ id: combatant.id })"
+            >
+              <v-icon class="mr-2">mdi-skull</v-icon>
+              Downed
             </v-btn>
           </v-list-item>
+          <template v-if="combatant.id.length > 1">
+            <v-list-item v-if="!editing">
+              <v-btn
+                text
+                block
+                class="menu-button"
+                @click="onEdit(combatant.id)"
+              >
+                <v-icon class="mr-2">mdi-pencil</v-icon>
+                Edit NPC
+              </v-btn>
+            </v-list-item>
+            <v-list-item v-if="editing">
+              <v-btn
+                text
+                color="success"
+                class="menu-button"
+                block
+                @click="onSave"
+              >
+                <v-icon class="mr-2">mdi-content-save</v-icon>
+                Save NPC
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn
+                text
+                block
+                color="red"
+                class="menu-button"
+                @click="onDelete"
+              >
+                <v-icon class="mr-2">mdi-delete</v-icon>
+                Delete NPC
+              </v-btn>
+            </v-list-item>
+          </template>
         </v-list>
       </v-menu>
     </v-list-item-content>
@@ -147,9 +164,9 @@ export default defineComponent<CombatantItemProps>({
 .content {
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: 1fr 75px 64px 32px;
+  grid-template-columns: 1fr 75px 48px;
   gap: 8px;
-  grid-template-areas: 'title init downed';
+  grid-template-areas: 'title init menu';
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 
   .item-title {
@@ -162,9 +179,21 @@ export default defineComponent<CombatantItemProps>({
     grid-area: init;
   }
 
-  .downed-button {
-    grid-area: downed;
+  .menu {
+    grid-area: menu;
     justify-self: center;
   }
+}
+
+.menu-button {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.downed {
+  font-size: 0.6rem;
+  color: #b71c1c;
+  margin-left: 4px;
 }
 </style>

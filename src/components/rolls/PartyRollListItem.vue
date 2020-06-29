@@ -4,7 +4,7 @@
       <span class="name">{{ player.name }}</span>
       <v-select
         :value="playerSkill"
-        :items="skills"
+        :items="skills.concat(saves)"
         label="Skills"
         class="skills"
         hide-details

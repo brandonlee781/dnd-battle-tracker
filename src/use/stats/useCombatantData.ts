@@ -1,8 +1,10 @@
 import { Ref, ComputedRef, computed } from '@vue/composition-api'
 import { Battle, Character } from '@/store'
-import { FieldType, getNewColor } from './useBattleData'
+import { FieldType } from './useBattleData'
 import capitalize from '@/helpers/capitalize'
 import { nonNullable } from './useBattleTableData'
+import { getNewColor } from '@/helpers/colors'
+import Color from 'color'
 
 interface UseCombatantsDataProps {
   battles: Ref<Battle[]>
@@ -17,17 +19,11 @@ interface TargetData {
 
 function getSelectedColor(name) {
   const col = getNewColor(name)
-  const match = col.match(/rgb\((.*)\)/i)
-  if (match?.length && match?.length > 1) {
-    return {
-      backgroundColor: `rgba(${match[1]}, 0.3)`,
-      pointBackgroundColor: col,
-      pointBorderColor: '#bbb',
-      borderColor: col,
-    }
-  }
   return {
-    backgroundColor: `${col}22`,
+    backgroundColor: Color(col)
+      .fade(0.8)
+      .rgb()
+      .string(),
     pointBackgroundColor: col,
     pointBorderColor: '#bbb',
     borderColor: col,
