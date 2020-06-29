@@ -142,6 +142,7 @@ export default function({
           gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
           ticks: {
             fontColor: '#ccc',
+            beginAtZero: true,
           },
         },
       ],
@@ -150,6 +151,7 @@ export default function({
           gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
           ticks: {
             fontColor: '#ccc',
+            beginAtZero: true,
           },
         },
       ],

@@ -51,31 +51,6 @@ export default {
         },
         legend: {
           ...this.options.legend,
-          // onClick: (event, legendItem) => {
-          //   this.$emit('click:legend', legendItem)
-          // },
-          // onHover: function(event, legendItem) {
-          //   const chart = this.chart
-          //   const { datasets } = chart.data
-
-          //   datasets.forEach((set, index) => {
-          //     if (index !== legendItem.datasetIndex) {
-          //       set.backgroundColor = `${set.backgroundColor}44`
-          //     }
-          //   })
-          //   chart.update()
-          // },
-          // onLeave: function(event, legendItem) {
-          //   const chart = this.chart
-          //   const { datasets } = chart.data
-
-          //   datasets.forEach((set, index) => {
-          //     if (index !== legendItem.datasetIndex) {
-          //       set.backgroundColor = `${set.backgroundColor.slice(0, -2)}`
-          //     }
-          //   })
-          //   chart.update()
-          // },
         },
       }
     },

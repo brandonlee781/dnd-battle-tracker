@@ -62,8 +62,7 @@ export default function({
   })
 
   const barChartData = computed(() => {
-    const options = {
-      id: 'battleData',
+    const options: ChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       legend: {
