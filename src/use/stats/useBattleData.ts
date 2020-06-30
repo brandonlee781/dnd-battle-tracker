@@ -10,6 +10,7 @@ import { ChartOptions, ChartData, Chart } from 'chart.js'
 import * as ChartDataLabel from 'chartjs-plugin-datalabels'
 import capitalize from '@/helpers/capitalize'
 import { getNewColor } from '@/helpers/colors'
+import { LabelContext } from '@/plugins/chart-plugins'
 
 export interface BattleData {
   text: string
@@ -29,16 +30,6 @@ interface UseBattleDataProps {
 interface RoundData {
   options: ComputedRef<ChartOptions> | {}
   chartData: ComputedRef<ChartData> | {}
-}
-
-interface LocalChart extends Chart {
-  $totalizer?: {
-    utmost: number
-    totals: number[]
-  }
-}
-interface LabelContext extends Omit<ChartDataLabel.Context, 'chart'> {
-  chart: LocalChart
 }
 
 export default function({

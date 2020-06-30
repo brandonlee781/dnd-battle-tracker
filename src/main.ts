@@ -5,6 +5,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 require('./plugins/composition-api')
 require('./plugins/filters')
+require('./plugins/chart-plugins')
 
 Vue.config.productionTip = false
 

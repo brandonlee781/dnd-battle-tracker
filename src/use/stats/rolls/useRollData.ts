@@ -4,6 +4,15 @@ import { DisplayType } from '../useBattleData'
 import capitalize from '@/helpers/capitalize'
 import { nonNullable } from '../useBattleTableData'
 import { getNewColor } from '@/helpers/colors'
+import { ChartOptions } from 'chart.js'
+
+interface LabelNode {
+  label: string
+  expand?: boolean | 'focus'
+  children?: SubLabelNode[]
+}
+
+declare type SubLabelNode = LabelNode | string
 
 export const skills = [
   'Acrobatics',
@@ -24,6 +33,39 @@ export const skills = [
   'Slight of Hand',
   'Stealth',
   'Survival',
+]
+
+export const skillHeirarchy: LabelNode[] = [
+  {
+    label: 'Strength',
+    children: ['Athletics'],
+  },
+  {
+    label: 'Dexterity',
+    children: ['Acrobatics', 'Sleight of Hand', 'Stealth'],
+  },
+  {
+    label: 'Constitution',
+    children: [],
+  },
+  {
+    label: 'Intelligence',
+    children: ['Arcana', 'History', 'Investigation', 'Nature', 'Religion'],
+  },
+  {
+    label: 'Wisdom',
+    children: [
+      'Animal Handling',
+      'Insight',
+      'Medicine',
+      'Perception',
+      'Survival',
+    ],
+  },
+  {
+    label: 'Charisma',
+    children: ['Deception', 'Intimidation', 'Performance', 'Persuasion'],
+  },
 ]
 
 export const saves = [
@@ -119,12 +161,12 @@ export default function({
       .filter(nonNullable)
   })
 
-  const skillOptions = computed(() => ({
+  const skillOptions: Ref<ChartOptions> = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
     legend: {
       display: !selectedSkill.value,
-      position: 'bottom',
+      position: 'top',
       labels: {
         fontColor: '#ccc',
       },
@@ -136,9 +178,16 @@ export default function({
       )}`,
       fontColor: '#ccc',
     },
+    layout: {
+      padding: {
+        bottom: selectedSkill.value ? 0 : 20,
+      },
+    },
     scales: {
       xAxes: [
         {
+          type: selectedSkill.value ? 'linear' : 'hierarchical',
+          offset: false,
           gridLines: { color: 'rgba(255, 255, 255, 0.2)' },
           ticks: {
             fontColor: '#ccc',
@@ -159,13 +208,19 @@ export default function({
     plugins: {
       datalabels: {
         color: '#eee',
-        anchor: 'end',
-        align: 'end',
+        font: {
+          weight: 'bold',
+        },
+        clip: true,
         formatter: function(val) {
           if (val > 0) {
             return Math.round(val)
           }
           return ''
+        },
+        display: function(ctx) {
+          const value = ctx.dataset.data?.[ctx.dataIndex]
+          return !!value && value > 0
         },
       },
     },
@@ -195,20 +250,32 @@ export default function({
       }
     } else {
       return {
-        labels: skills,
+        labels: skillHeirarchy,
         datasets: players.value.map(pc => {
           return {
             label: `${pc.name}'s Rolls`,
             backgroundColor: getNewColor(pc.name),
-            data: skills.map(skill => {
-              return (
-                getDisplay(
-                  skillData.value.filter(
-                    roll => roll.player.id === pc.id && roll.skill === skill
-                  ),
-                  display.value
-                ) || 0
-              )
+            barThickness: 15,
+            tree: skillHeirarchy.map(skill => {
+              return {
+                value:
+                  getDisplay(
+                    skillData.value.filter(
+                      roll =>
+                        roll.player.id === pc.id && roll.skill === skill.label
+                    ),
+                    display.value
+                  ) || 0,
+                children: skill.children?.map(child => ({
+                  value:
+                    getDisplay(
+                      skillData.value.filter(
+                        roll => roll.player.id === pc.id && roll.skill === child
+                      ),
+                      display.value
+                    ) || 0,
+                })),
+              }
             }),
           }
         }),
