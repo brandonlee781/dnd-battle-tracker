@@ -1,4 +1,4 @@
-import { Battle, BattleTurn, Character } from '@/store'
+import { Battle, BattleTurn, Character, BattleAction } from '@/store'
 import { computed } from '@vue/composition-api'
 import { FieldType, BattleData } from './useBattleData'
 
@@ -12,7 +12,7 @@ function getAverage(nums: number[]) {
 
 export function perAction(turns: BattleTurn[], cb: Function) {
   turns.forEach(turn => {
-    turn.action.forEach(a => cb(a))
+    turn.action.forEach((a: BattleAction) => cb(a))
   })
 }
 
@@ -37,7 +37,9 @@ function getAllTotal(
   }
   const turnArray: BattleData[] = []
   const turns = getCombatantsTurns(battles, c)
-  perAction(turns, a => turnArray.push({ ...totalObject, value: a[field] }))
+  perAction(turns, a =>
+    turnArray.push({ ...totalObject, value: a[field], target: a.target.name })
+  )
 
   return turnArray
 }

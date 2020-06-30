@@ -6,8 +6,7 @@ import { computed, ComputedRef, Ref, ref, watch } from '@vue/composition-api'
 import useCombatantData from './useCombatantData'
 import useFightData from './useFightData'
 import useRoundData from './useRoundData'
-import { ChartOptions, ChartData, Chart } from 'chart.js'
-import * as ChartDataLabel from 'chartjs-plugin-datalabels'
+import { ChartOptions, ChartData, ChartDataSets, ChartPoint } from 'chart.js'
 import capitalize from '@/helpers/capitalize'
 import { getNewColor } from '@/helpers/colors'
 import { LabelContext } from '@/plugins/chart-plugins'
@@ -15,6 +14,12 @@ import { LabelContext } from '@/plugins/chart-plugins'
 export interface BattleData {
   text: string
   value: number
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+interface TotalDataSetData extends ChartDataSets {
+  targets?: string[]
+  data?: Array<number | null | undefined | number[]> | ChartPoint[]
 }
 
 export type FieldType = 'damage' | 'healing'
@@ -95,6 +100,22 @@ export default function({
           },
         ],
       },
+      tooltips: {
+        callbacks: {
+          footer: function(tooltipItems, data) {
+            const { datasetIndex, index } = tooltipItems[0]
+
+            if (datasetIndex !== undefined && index !== undefined) {
+              const setData: TotalDataSetData | undefined =
+                data.datasets?.[datasetIndex]
+              if (setData && setData.targets?.length) {
+                return `Target: ${setData.targets?.[index]}` || ''
+              }
+            }
+            return ''
+          },
+        },
+      },
       plugins: {
         datalabels: {
           labels: {
@@ -145,7 +166,7 @@ export default function({
         }
       })
       datasets = new Array(max).fill(0).map((v, i) => ({
-        label: '',
+        targets: [],
         backgroundColor: [],
         stackLabel: `Stack ${i}`,
         data: [],
@@ -170,9 +191,11 @@ export default function({
             datasets[i].backgroundColor.push(
               getNewColor(data.text, lightenAmount)
             )
+            datasets[i].targets.push(data.target)
             datasets[i].data.push(data.value)
           } else {
             datasets[i].backgroundColor.push(getNewColor(`${i}`))
+            datasets[i].targets.push('')
             datasets[i].data.push(0)
           }
         }

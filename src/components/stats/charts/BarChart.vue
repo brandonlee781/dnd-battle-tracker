@@ -44,6 +44,9 @@ export default {
         legend: {
           ...this.options.legend,
         },
+        tooltips: {
+          ...this.options.tooltips,
+        },
       }
     },
   },
