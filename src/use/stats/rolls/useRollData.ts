@@ -317,6 +317,9 @@ export default function({
     plugins: {
       datalabels: {
         color: '#eee',
+        font: {
+          weight: 'bold',
+        },
         formatter: function(val) {
           if (val > 0) {
             return Math.round(val)
