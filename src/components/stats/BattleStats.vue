@@ -2,10 +2,7 @@
   <div class="wrapper">
     <v-card class="card">
       <div class="tab-row">
-        <v-tabs
-          v-model="tab"
-          @change="tab === 2 ? (displayType = 'average') : null"
-        >
+        <v-tabs v-model="tab">
           <v-tab v-for="item in tabItems" :key="item.value">{{
             item.text
           }}</v-tab>
@@ -93,13 +90,11 @@ export default defineComponent({
     ])
     const displayType: Ref<DisplayType> = ref('total')
     const displayItems = computed(() => {
-      const items = [
-        { text: 'Total', value: 'total' },
+      return [
+        { text: tab.value === 2 ? 'Count' : 'Total', value: 'total' },
         { text: 'Average', value: 'average' },
         { text: 'Highest', value: 'high' },
       ]
-      if (tab.value === 2) return items.slice(1)
-      return items
     })
     const { collectionData: battles } = useCollection<Battle>('battles', {
       onMounted: true,

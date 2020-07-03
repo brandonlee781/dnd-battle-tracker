@@ -99,7 +99,7 @@ interface RollSeries {
 
 function getDisplay(items: RollCollection[], type: DisplayType) {
   if (type === 'total') {
-    return items.reduce((a, b) => a + b.roll, 0)
+    return items.map(item => item.roll >= 0).length
   }
 
   if (type === 'average') {
@@ -174,7 +174,7 @@ export default function({
     title: {
       display: true,
       text: `${selectedSkill.value || 'Skill'} Roll ${capitalize(
-        display.value
+        display.value === 'total' ? 'count' : display.value
       )}`,
       fontColor: '#ccc',
     },
@@ -293,7 +293,9 @@ export default function({
     },
     title: {
       display: true,
-      text: `${selectedSave.value || 'Save'} Roll ${capitalize(display.value)}`,
+      text: `${selectedSave.value || 'Save'} Roll ${capitalize(
+        display.value === 'total' ? 'count' : display.value
+      )}`,
       fontColor: '#ccc',
     },
     scales: {
