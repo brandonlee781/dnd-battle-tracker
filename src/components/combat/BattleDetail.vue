@@ -1,6 +1,6 @@
 <template>
   <v-list dense>
-    <template v-for="(turn, turnIndex) in battle.turns">
+    <template v-for="(turn, turnIndex) in battleTurns">
       <v-subheader
         v-if="turn.action.length"
         :key="`header-${battle.name}-${turn.round}-${turn.turn}`"
@@ -41,6 +41,10 @@ export default defineComponent({
       type: Object,
       default: null,
     },
+    reversed: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const showTurns: Ref<{ show: boolean }[]> = computed(() =>
@@ -50,7 +54,12 @@ export default defineComponent({
     const toggleTurn = (index: number) => {
       showTurns.value[index].show = !showTurns.value[index].show ?? true
     }
-    return { showTurns, toggleTurn }
+
+    const battleTurns = computed(() => {
+      if (props.reversed) return props.battle.turns.reverse()
+      return props.battle.turns
+    })
+    return { showTurns, toggleTurn, battleTurns }
   },
 })
 </script>

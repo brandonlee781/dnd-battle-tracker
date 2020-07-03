@@ -3,7 +3,7 @@
     <v-card v-if="currentBattle.name.length" class="current-battle-card mb-4">
       <v-card-title>{{ currentBattle.name }}</v-card-title>
       <v-card-text>
-        <BattleDetail :battle="currentBattle" />
+        <BattleDetail :battle="currentBattle" reversed />
       </v-card-text>
     </v-card>
 
@@ -41,10 +41,13 @@ export default defineComponent({
     const { currentBattle } = useState<AppState>({
       currentBattle: state => state.currentBattle,
     })
-    const { error, collectionData } = useCollection<Battle>('battles', {
-      onMounted: true,
-      orderBy: { field: 'createdDate' },
-    })
+    const { error, collectionData: pastBattles } = useCollection<Battle>(
+      'battles',
+      {
+        onMounted: true,
+        orderBy: { field: 'createdDate' },
+      }
+    )
 
     const { deleteBattle } = useActions(['deleteBattle'])
     const onBattleDelete = id => {
@@ -52,13 +55,6 @@ export default defineComponent({
         deleteBattle({ id })
       }
     }
-
-    const pastBattles = computed(() => {
-      return collectionData.value.map(d => ({
-        ...d,
-        turns: d.turns.reverse(),
-      }))
-    })
 
     return {
       currentBattle,
