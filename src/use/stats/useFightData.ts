@@ -2,12 +2,11 @@ import { Battle, BattleTurn, Character, BattleAction } from '@/store'
 import { computed } from '@vue/composition-api'
 import { FieldType, BattleData } from './useBattleData'
 
-function getAverage(nums: number[]) {
+function getAverage(nums: number[], length) {
   if (!nums.length) return 0
-  const len = nums.filter(n => n).length
   const total = nums.reduce((a, b) => a + b, 0)
 
-  return total / len
+  return parseFloat((total / length).toFixed(3))
 }
 
 export function perAction(turns: BattleTurn[], cb: Function) {
@@ -57,7 +56,7 @@ function getAllAverage(
 
   return {
     text,
-    value: getAverage(value),
+    value: getAverage(value, turns.length),
   }
 }
 
