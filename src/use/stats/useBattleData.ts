@@ -141,7 +141,6 @@ export default function({
               color: '#eee',
               anchor: 'end',
               align: 'end',
-              clip: true,
               formatter: function(value, ctx: LabelContext) {
                 const total = ctx.chart.$totalizer?.totals[ctx.dataIndex] || 0
                 if (total > 0) {
