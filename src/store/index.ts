@@ -251,15 +251,15 @@ export default new Vuex.Store<AppState>({
         character,
       }
 
-      if (battleTurn.action.length === 0) {
-        battleTurn.action.push({
-          target: undefined,
-          damage: 0,
-          healing: 0,
-          downed: false,
-          message: `${character.name} did nothing worth noting.`,
-        })
-      }
+      // if (battleTurn.action.length === 0) {
+      //   battleTurn.action.push({
+      //     target: undefined,
+      //     damage: 0,
+      //     healing: 0,
+      //     downed: false,
+      //     message: `${character.name} did nothing worth noting.`,
+      //   })
+      // }
 
       const turnIndex = state.currentBattle.turns.findIndex(
         turn => turn.round === battleTurn.round && turn.turn === battleTurn.turn
