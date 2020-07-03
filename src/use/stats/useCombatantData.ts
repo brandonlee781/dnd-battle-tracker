@@ -39,9 +39,7 @@ export default function({
   const againstData = computed(() => {
     const selectedId = selectedCombatant.value?.id
     if (selectedId) {
-      const chars = combatants.value
-        .map(c => c.id)
-        .filter(id => id !== selectedId)
+      const chars = combatants.value.map(c => c.id)
       const turnsAsChar = battles.value
         .map(b => b.turns)
         .reduce((a, b) => a.concat(b), [])
@@ -76,9 +74,7 @@ export default function({
   const fromData = computed(() => {
     const selectedId = selectedCombatant.value?.id
     if (selectedId) {
-      const chars = combatants.value
-        .map(c => c.id)
-        .filter(id => id !== selectedId)
+      const chars = combatants.value.map(c => c.id)
       const turnsAsTarget = battles.value
         .map(b => b.turns)
         .reduce((a, b) => a.concat(b), [])
@@ -126,9 +122,7 @@ export default function({
 
     const curr = combatants.value[index]
     return {
-      labels: combatants.value
-        .filter(c => c.id !== selectedCombatant.value?.id)
-        .map(c => c.name),
+      labels: combatants.value.map(c => c.name),
       datasets: [
         {
           label: curr.name,
@@ -151,9 +145,7 @@ export default function({
     )
     const curr = combatants.value[index]
     return {
-      labels: combatants.value
-        .filter(c => c.id !== selectedCombatant.value?.id)
-        .map(c => c.name),
+      labels: combatants.value.map(c => c.name),
       datasets: [
         {
           label: curr.name,
