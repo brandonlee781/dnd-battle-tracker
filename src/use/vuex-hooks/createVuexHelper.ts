@@ -6,7 +6,7 @@ import { getCurrentInstance, computed } from '@vue/composition-api'
 import { IUseState, IUseGetters, IUseMutations, IUseActions } from './interface'
 
 export function getInstance() {
-  const vm = getCurrentInstance()
+  const vm = getCurrentInstance() || window.instance
   if (!vm) {
     throw new Error(
       'You must use this function within the "setup()" method, or insert the store as first argument.'

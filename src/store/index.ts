@@ -58,10 +58,15 @@ export interface RollCollection extends Omit<RollData, 'date'> {
   }
 }
 
+export interface CurrentBattle extends Omit<Battle, 'id'> {
+  currentRound: number
+  currentTurn: number
+}
+
 export interface AppState {
   party: PC[]
   npcs: NPC[]
-  currentBattle: Omit<Battle, 'id'>
+  currentBattle: CurrentBattle
   user: firebase.auth.UserCredential['user'] | null
 }
 
@@ -115,6 +120,8 @@ export default new Vuex.Store<AppState>({
       name: '',
       combatants: [],
       turns: [],
+      currentRound: 1,
+      currentTurn: 1,
     },
     user: null,
   },
@@ -179,6 +186,18 @@ export default new Vuex.Store<AppState>({
         state.npcs.splice(index, 1)
       }
     },
+    SET_CURRENT_TURN(state, { value }) {
+      const { currentBattle } = state
+      if (value > currentBattle.combatants.length) {
+        state.currentBattle.currentTurn = 1
+        state.currentBattle.currentRound += 1
+      } else if (value <= 0 && state.currentBattle.currentRound > 1) {
+        state.currentBattle.currentTurn = currentBattle.combatants.length
+        state.currentBattle.currentRound -= 1
+      } else if (value > 0) {
+        state.currentBattle.currentTurn = value
+      }
+    },
     SET_BATTLE_NAME(state, { name }) {
       state.currentBattle.name = name
     },
@@ -199,6 +218,8 @@ export default new Vuex.Store<AppState>({
         name: '',
         combatants: [],
         turns: [],
+        currentRound: 1,
+        currentTurn: 1,
       }
     },
   },

@@ -46,7 +46,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from '@vue/composition-api'
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  getCurrentInstance,
+} from '@vue/composition-api'
 import LoginMenu from '@/components/LoginMenu.vue'
 import { useState } from './use/vuex-hooks'
 import { AppState } from './store'
@@ -60,6 +65,12 @@ export default defineComponent({
     const isMobile = ref(false)
     const { user } = useState<AppState>({
       user: state => state.user,
+    })
+    onMounted(() => {
+      const vm = getCurrentInstance()
+      if (vm) {
+        window.instance = vm
+      }
     })
     const onResize = () => {
       const width = window.innerWidth

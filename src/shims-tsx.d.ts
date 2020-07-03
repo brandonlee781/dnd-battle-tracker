@@ -14,4 +14,8 @@ declare global {
       [elem: string]: any
     }
   }
+
+  interface Window {
+    instance: any
+  }
 }

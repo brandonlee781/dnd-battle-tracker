@@ -94,27 +94,25 @@ import {
   useActions,
   useMutations,
 } from '@/use/vuex-hooks'
-import { AppState, Battle, NPC } from '@/store'
+import { AppState, NPC } from '@/store'
 
-export function useTurnCount(
-  battle: Battle
-): { currentRound: Ref<number>; currentTurn: WritableComputedRef<number> } {
-  const currentTurnCount = ref(1)
-  const currentRound = ref(1)
-  const currentTurn = computed({
+export function useTurnCount(): {
+  currentRound: Ref<number>
+  currentTurn: WritableComputedRef<number>
+} {
+  const { turn, currentRound } = useState<AppState>({
+    turn: state => state.currentBattle.currentTurn,
+    currentRound: state => state.currentBattle.currentRound,
+  })
+  const { setTurn } = useMutations({
+    setTurn: 'SET_CURRENT_TURN',
+  })
+  const currentTurn: WritableComputedRef<number> = computed({
     get() {
-      return currentTurnCount.value
+      return turn.value
     },
-    set(val: number) {
-      if (val > battle.combatants.length) {
-        currentTurnCount.value = 1
-        currentRound.value += 1
-      } else if (val <= 0 && currentRound.value > 1) {
-        currentTurnCount.value = battle.combatants.length
-        currentRound.value -= 1
-      } else if (val > 0) {
-        currentTurnCount.value = val
-      }
+    set(value) {
+      setTurn({ value })
     },
   })
   return {
@@ -185,7 +183,7 @@ export default defineComponent({
       methods: { setBattleName },
       actions: { startCombat, endCombat, endTurn },
     } = useCombatState()
-    const { currentTurn, currentRound } = useTurnCount(currentBattle.value)
+    const { currentTurn, currentRound } = useTurnCount()
     const activeCharacter = computed(() => {
       const character = combatOrder.value[currentTurn.value - 1]
       emit('update:active', character.id)

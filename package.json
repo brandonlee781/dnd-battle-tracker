@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@types/chart.js": "^2.9.22",
-    "@vue/composition-api": "^0.6.4",
+    "@vue/composition-api": "^1.0.0-beta.1",
     "@vueuse/firebase": "^2.0.34",
     "chart.js": "^2.9.3",
     "chartjs-plugin-datalabels": "^0.7.0",
