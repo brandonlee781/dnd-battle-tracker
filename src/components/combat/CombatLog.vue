@@ -26,9 +26,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent } from '@vue/composition-api'
 import { useState, useActions } from '@/use/vuex-hooks'
-import { AppState, Battle } from '@/store'
+import { AppState } from '@/store'
+import { Battle } from '@/store/CombatModule'
 import BattleDetail from './BattleDetail.vue'
 import useCollection from '@/use/useCollection'
 
@@ -39,7 +40,7 @@ export default defineComponent({
   },
   setup() {
     const { currentBattle } = useState<AppState>({
-      currentBattle: state => state.currentBattle,
+      currentBattle: state => state.combat.currentBattle,
     })
     const { error, collectionData: pastBattles } = useCollection<Battle>(
       'battles',

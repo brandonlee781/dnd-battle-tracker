@@ -101,8 +101,8 @@ export function useTurnCount(): {
   currentTurn: WritableComputedRef<number>
 } {
   const { turn, currentRound } = useState<AppState>({
-    turn: state => state.currentBattle.currentTurn,
-    currentRound: state => state.currentBattle.currentRound,
+    turn: state => state.combat.currentBattle.currentTurn,
+    currentRound: state => state.combat.currentBattle.currentRound,
   })
   const { setTurn } = useMutations({
     setTurn: 'SET_CURRENT_TURN',

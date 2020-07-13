@@ -1,44 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import cuid from 'cuid'
-import { db } from '@/db'
+
 import createPersistedState from 'vuex-persistedstate'
+import CharacterModule, { PC, NPC } from './CharacterModule'
+import CombatModule, { CurrentBattle } from './CombatModule'
 
 Vue.use(Vuex)
-
-export interface PC {
-  id: string
-  name: string
-  initiative: number
-  downed: boolean
-  count?: null
-}
-export interface NPC extends Omit<PC, 'count'> {
-  count?: number
-}
-export type Character = NPC | PC
-
-export interface BattleAction {
-  target?: Character
-  damage: number
-  healing: number
-  message: string
-  downed: number | boolean
-}
-export interface BattleTurn {
-  id: string
-  round: number
-  turn: number
-  character: Character
-  action: BattleAction[]
-}
-export interface Battle {
-  id: string
-  name: string
-  combatants: Character[]
-  turns: BattleTurn[]
-  createdDate?: Date
-}
 
 export type RollType = 'save' | 'skill'
 export interface RollData {
@@ -58,246 +25,26 @@ export interface RollCollection extends Omit<RollData, 'date'> {
   }
 }
 
-export interface CurrentBattle extends Omit<Battle, 'id'> {
-  currentRound: number
-  currentTurn: number
-}
-
 export interface AppState {
-  party: PC[]
-  npcs: NPC[]
-  currentBattle: CurrentBattle
-  user: firebase.auth.UserCredential['user'] | null
-}
-
-function getDamageMessage(action, character, state, commit) {
-  const { downed, target, damage } = action
-  let message = `${character.name} damaged ${target.name} for ${damage} hp`
-  if (downed) {
-    if (typeof downed === 'number' && target.count) {
-      if (downed === target.count) {
-        commit('TOGGLE_DOWNED_STATE', { id: target.id })
-        message += `, downing all of them.`
-      } else {
-        const killCount =
-          downed +
-          state.currentBattle.actions
-            .filter(a => a.target.id === target.id)
-            .reduce((a, b) => {
-              if (typeof b.downed === 'number') {
-                return a + b.downed
-              } else {
-                return a
-              }
-            }, 0)
-        if (killCount >= target.count) {
-          commit('TOGGLE_DOWNED_STATE', { id: target.id })
-          message += `, downing the last ${downed} of them.`
-        } else {
-          message += `, downing ${downed} of them.`
-        }
-      }
-    } else if (typeof downed === 'boolean') {
-      commit('TOGGLE_DOWNED_STATE', { id: target.id })
-      message += ', downing them.'
-    }
-  }
-
-  return message
+  characters?: CharacterModule
+  combat?: CombatModule
+  user: string | null
 }
 
 export default new Vuex.Store<AppState>({
   state: {
-    party: [
-      { id: '1', name: 'Chandra', initiative: 0, downed: false },
-      { id: '2', name: 'Demi', initiative: 0, downed: false },
-      { id: '3', name: 'Elryn', initiative: 0, downed: false },
-      { id: '4', name: 'Kal', initiative: 0, downed: false },
-      { id: '5', name: 'Val', initiative: 0, downed: false },
-    ],
-    npcs: [],
-    currentBattle: {
-      name: '',
-      combatants: [],
-      turns: [],
-      currentRound: 1,
-      currentTurn: 1,
-    },
     user: null,
-  },
-  getters: {
-    combatOrder(state) {
-      return [...state.party, ...state.npcs].sort((a, b) => {
-        if (a.initiative > b.initiative) return -1
-        if (a.initiative < b.initiative) return 1
-        return 0
-      })
-    },
   },
   mutations: {
     SET_USER(state, { user }) {
       state.user = user
     },
-    SET_INITIATIVE(state, { id, initiative }) {
-      const partyIndex = state.party.findIndex(p => p.id === id)
-      if (partyIndex >= 0) {
-        state.party[partyIndex].initiative = initiative
-      } else {
-        const npcIndex = state.npcs.findIndex(p => p.id === id)
-        if (npcIndex >= 0) {
-          state.npcs[npcIndex].initiative = initiative
-        }
-      }
-    },
-    TOGGLE_DOWNED_STATE(state, { id }) {
-      const partyIndex = state.party.findIndex(p => p.id === id)
-      if (partyIndex >= 0) {
-        state.party[partyIndex].downed = !state.party[partyIndex].downed
-      } else {
-        const npcIndex = state.npcs.findIndex(p => p.id === id)
-        if (npcIndex >= 0) {
-          state.npcs[npcIndex].downed = !state.npcs[npcIndex].downed
-        }
-      }
-    },
-    ADD_NPC(state, { name, count, initiative, id }) {
-      const newNpc = {
-        id,
-        name,
-        count: +count,
-        initiative: +initiative,
-        downed: false,
-      }
-      state.npcs.push(newNpc)
-    },
-    EDIT_NPC(state, { data, id }: { data: Partial<NPC>; id: string }) {
-      const npcIndex = state.npcs.findIndex(n => n.id === id)
-      if (npcIndex >= 0) {
-        const editedNpc = {
-          ...state.npcs[npcIndex],
-          ...data,
-        }
-        Vue.set(state.npcs, npcIndex, editedNpc)
-      }
-    },
-    REMOVE_NPC(state, { id }) {
-      const index = state.npcs.findIndex(n => n.id === id)
-      if (index >= 0) {
-        state.npcs.splice(index, 1)
-      }
-    },
-    SET_CURRENT_TURN(state, { value }) {
-      const { currentBattle } = state
-      if (value > currentBattle.combatants.length) {
-        state.currentBattle.currentTurn = 1
-        state.currentBattle.currentRound += 1
-      } else if (value <= 0 && state.currentBattle.currentRound > 1) {
-        state.currentBattle.currentTurn = currentBattle.combatants.length
-        state.currentBattle.currentRound -= 1
-      } else if (value > 0) {
-        state.currentBattle.currentTurn = value
-      }
-    },
-    SET_BATTLE_NAME(state, { name }) {
-      state.currentBattle.name = name
-    },
-    SET_BATTLE_DATE(state) {
-      state.currentBattle.createdDate = new Date()
-    },
-    SET_BATTLE_COMBATANTS(state, { combatants }) {
-      state.currentBattle.combatants = combatants
-    },
-    ADD_BATTLE_TURN(state, { turn }) {
-      state.currentBattle.turns.push(turn)
-    },
-    MODIFY_BATTLE_TURN(state, { turn, index }) {
-      state.currentBattle.turns[index] = turn
-    },
-    RESET_CURRENT_BATTLE(state) {
-      state.currentBattle = {
-        name: '',
-        combatants: [],
-        turns: [],
-        currentRound: 1,
-        currentTurn: 1,
-      }
-    },
   },
-  actions: {
-    startCombat({ state, commit }) {
-      commit('SET_BATTLE_COMBATANTS', {
-        combatants: [...state.party, ...state.npcs],
-      })
-      commit('SET_BATTLE_DATE')
-    },
-    endCombat({ state, commit }) {
-      const { party, npcs } = state
-      const battle = {
-        ...state.currentBattle,
-        id: cuid(),
-      }
-      db.collection('battles')
-        .doc(battle.id)
-        .set(battle)
-      party.forEach(p => {
-        commit('SET_PARTY_INITIATIVE', { id: p.id, initiative: 0 })
-      })
-      npcs.forEach(n => {
-        commit('REMOVE_NPC', { id: n.id })
-      })
-      commit('SET_BATTLE_COMBATANTS', {
-        combatants: [],
-      })
-      commit('RESET_CURRENT_BATTLE')
-    },
-    endTurn({ state, commit }, { turn, round, action, character }) {
-      const battleTurn: BattleTurn = {
-        id: cuid(),
-        turn,
-        round,
-        action: action.map(a => {
-          if (a.damage > 0) {
-            a.message = getDamageMessage(a, character, state, commit)
-          }
-
-          if (a.healing > 0) {
-            a.message = `${character.name} healed ${a.target.name} for ${a.healing} hp.`
-          }
-
-          if (a.damage === 0 && a.healing === 0) {
-            a.message = `${character.name} did nothing worth noting.`
-          }
-          return a
-        }),
-        character,
-      }
-
-      // if (battleTurn.action.length === 0) {
-      //   battleTurn.action.push({
-      //     target: undefined,
-      //     damage: 0,
-      //     healing: 0,
-      //     downed: false,
-      //     message: `${character.name} did nothing worth noting.`,
-      //   })
-      // }
-
-      const turnIndex = state.currentBattle.turns.findIndex(
-        turn => turn.round === battleTurn.round && turn.turn === battleTurn.turn
-      )
-
-      if (turnIndex >= 0) {
-        commit('MODIFY_BATTLE_TURN', { turn: battleTurn, index: turnIndex })
-      } else {
-        commit('ADD_BATTLE_TURN', { turn: battleTurn })
-      }
-    },
-    async deleteBattle(ctx, { id }) {
-      db.collection('battles')
-        .doc(id)
-        .delete()
-    },
+  modules: {
+    characters: CharacterModule,
+    combat: CombatModule,
   },
-  modules: {},
   plugins: [createPersistedState()],
 })
+
+export { PC, NPC, CurrentBattle }
